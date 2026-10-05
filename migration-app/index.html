@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pentaho to DataStage migration</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono&family=IBM+Plex+Sans:wght@300;400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="ds/colors_and_type.css">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header class="hdr">
+  <a class="hdr-brand" href="#"><span>IBM</span><b>DataStage</b></a>
+  <nav class="hdr-nav" aria-label="Main">
+    <a class="hdr-link is-active" href="#">Migrations</a>
+    <a class="hdr-link" href="#">Projects</a>
+    <a class="hdr-link" href="#">Jobs</a>
+  </nav>
+  <button class="hdr-btn" id="open-settings" aria-label="Gateway settings"><svg width="20" height="20" viewBox="0 0 32 32" fill="currentColor"><path d="M27 16.76c0-.25.02-.5.02-.76s-.02-.51-.04-.76l1.92-1.68a1 1 0 00.21-1.26l-2.18-3.78a1 1 0 00-1.18-.44l-2.4.8a10.4 10.4 0 00-1.3-.76l-.5-2.48a1 1 0 00-.98-.8h-4.36a1 1 0 00-.98.8l-.5 2.48c-.46.22-.9.48-1.3.76l-2.4-.8a1 1 0 00-1.18.44l-2.18 3.78a1 1 0 00.21 1.26l1.92 1.68c-.02.25-.04.5-.04.76s.02.51.04.76l-1.92 1.68a1 1 0 00-.21 1.26l2.18 3.78a1 1 0 001.18.44l2.4-.8c.4.28.84.54 1.3.76l.5 2.48a1 1 0 00.98.8h4.36a1 1 0 00.98-.8l.5-2.48c.46-.22.9-.48 1.3-.76l2.4.8a1 1 0 001.18-.44l2.18-3.78a1 1 0 00-.21-1.26zM16 20a4 4 0 110-8 4 4 0 010 8z" transform="translate(-1 0)"/></svg></button>
+</header>
+<main class="page">
+  <div class="intro">
+    <nav aria-label="Breadcrumb" class="crumbs"><a href="#">Migrations</a><span>/</span><span>New migration</span></nav>
+    <h1>Migrate a Pentaho flow to DataStage</h1>
+    <p>Upload the Pentaho transformations, the job that orchestrates them and the functional document that describes them. We translate everything into a single DataStage .dsx export you can import into your project.</p>
+  </div>
+  <div id="progress"></div>
+  <div class="cols">
+    <div id="main" class="col-main"></div>
+    <aside id="aside" class="summary" aria-labelledby="sum-title"></aside>
+  </div>
+</main>
+<dialog id="settings" aria-labelledby="cfg-title">
+  <div class="dlg-head"><h2 id="cfg-title">Gateway settings</h2>
+    <button class="icon-btn" id="cfg-close" aria-label="Close"><svg width="16" height="16" viewBox="0 0 32 32" fill="currentColor"><path d="M17.4141 16L24 9.4141 22.5859 8 16 14.5859 9.4143 8 8 9.4141 14.5859 16 8 22.5859 9.4143 24 16 17.4141 22.5859 24 24 22.5859 17.4141 16z"/></svg></button></div>
+  <p class="sub dlg-intro">Configure how the Flask gateway reaches your APIs. Secrets stay on the server and are never shown again after you save.</p>
+  <div id="cfg-body" class="dlg-body"></div>
+  <div class="dlg-foot"><p class="gate" id="cfg-msg" role="status"></p>
+    <div class="dlg-btns"><button class="btn btn-tertiary" id="cfg-test">Save and test connection</button><button class="btn btn-primary" id="cfg-save">Save</button></div></div>
+</dialog>
+<div id="toast" class="toast" role="alert" hidden></div>
+<script type="module" src="app.js"></script>
+</body>
+</html>

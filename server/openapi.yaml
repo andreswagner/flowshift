@@ -1,0 +1,475 @@
+openapi: 3.1.0
+info:
+  title: Pentaho to DataStage Migration API
+  version: 1.0.0
+  summary: Upstream contract the Flask gateway calls to translate Pentaho flows into a DataStage .dsx export.
+  description: |
+    A migration is created, loaded with input files, configured, started and then polled until it
+    finishes. Translation is asynchronous.
+
+    **Lifecycle**
+
+    `draft` → `queued` → `running` → `succeeded` | `failed` | `cancelled`
+
+    Cancelling a `queued` or `running` migration returns it to `draft` with its files and settings
+    intact, so it can be started again. Files can be added or removed, and settings changed, only
+    while the migration is in `draft`.
+
+    **Conventions**
+
+    - Errors use `application/problem+json` (RFC 9457).
+    - IDs are opaque, prefixed strings (`mig_…`, `fil_…`). Clients must not parse them.
+    - Timestamps are UTC, ISO 8601.
+    - Clients must treat unknown `status` values as `running`.
+    - `Idempotency-Key` is supported on the two POST operations that create or start work.
+servers:
+  - url: https://migrations.example.com/v1
+    description: Replace with your deployment
+security:
+  - bearerAuth: []
+tags:
+  - name: Migrations
+  - name: Files
+  - name: Result
+
+paths:
+  /migrations:
+    post:
+      tags: [Migrations]
+      operationId: createMigration
+      summary: Create a migration
+      description: Creates an empty migration in `draft` state.
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      responses:
+        '201':
+          description: Created.
+          headers:
+            Location:
+              description: URL of the new migration.
+              schema: { type: string, format: uri-reference }
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Migration' }
+              example:
+                id: mig_01J9Z8K2Q
+                status: draft
+                createdAt: '2026-10-05T14:02:11Z'
+                updatedAt: '2026-10-05T14:02:11Z'
+                settings: { targetVersion: IBM DataStage 11.7, projectName: null, useFunctionalDoc: true }
+                progress: { percent: 0, steps: [] }
+                error: null
+                result: null
+                links: { self: /v1/migrations/mig_01J9Z8K2Q }
+        '401': { $ref: '#/components/responses/Problem' }
+        '429': { $ref: '#/components/responses/Problem' }
+
+  /migrations/{migrationId}:
+    parameters:
+      - $ref: '#/components/parameters/MigrationId'
+    get:
+      tags: [Migrations]
+      operationId: getMigration
+      summary: Get migration status and result
+      description: |
+        Poll this endpoint while `status` is `queued` or `running`. Honour `Retry-After` and send
+        `If-None-Match` with the last `ETag` to receive `304` when nothing changed.
+      parameters:
+        - name: If-None-Match
+          in: header
+          schema: { type: string }
+      responses:
+        '200':
+          description: Current state.
+          headers:
+            ETag: { schema: { type: string } }
+            Retry-After:
+              description: Seconds to wait before polling again. Present while the migration is active.
+              schema: { type: integer, minimum: 1 }
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Migration' }
+              examples:
+                running:
+                  summary: In progress
+                  value:
+                    id: mig_01J9Z8K2Q
+                    status: running
+                    createdAt: '2026-10-05T14:02:11Z'
+                    updatedAt: '2026-10-05T14:03:02Z'
+                    settings: { targetVersion: IBM DataStage 11.7, projectName: SALES_DWH, useFunctionalDoc: true }
+                    progress:
+                      percent: 40
+                      steps:
+                        - { key: read_jobs, label: Read the job definitions, status: succeeded, detail: 2 .kjb files }
+                        - { key: parse_ktr, label: Parse transformations, status: succeeded, detail: 3 .ktr files }
+                        - { key: analyze_doc, label: Analyze the functional document, status: running }
+                        - { key: map_stages, label: Map Pentaho steps to DataStage stages, status: pending }
+                        - { key: generate_dsx, label: Generate the .dsx export, status: pending }
+                    error: null
+                    result: null
+                succeeded:
+                  summary: Finished
+                  value:
+                    id: mig_01J9Z8K2Q
+                    status: succeeded
+                    createdAt: '2026-10-05T14:02:11Z'
+                    updatedAt: '2026-10-05T14:04:40Z'
+                    settings: { targetVersion: IBM DataStage 11.7, projectName: SALES_DWH, useFunctionalDoc: true }
+                    progress: { percent: 100, steps: [] }
+                    error: null
+                    result:
+                      artifact:
+                        fileName: daily_sales_load.dsx
+                        sizeBytes: 218734
+                        downloadUrl: /v1/migrations/mig_01J9Z8K2Q/result/download
+                      summary: { sequenceJobs: 2, parallelJobs: 3 }
+                      items:
+                        - source: { name: daily_sales_load.kjb, type: Job }
+                          target: { name: daily_sales_load, type: Sequence job }
+                          status: ready_for_review
+                        - source: { name: load_customers.ktr, type: Transformation }
+                          target: { name: load_customers, type: Parallel job }
+                          status: ready_for_review
+                failed:
+                  summary: Failed
+                  value:
+                    id: mig_01J9Z8K2Q
+                    status: failed
+                    createdAt: '2026-10-05T14:02:11Z'
+                    updatedAt: '2026-10-05T14:03:30Z'
+                    settings: { targetVersion: IBM DataStage 11.7, projectName: SALES_DWH, useFunctionalDoc: true }
+                    progress: { percent: 20, steps: [] }
+                    error:
+                      type: https://migrations.example.com/problems/translation-failed
+                      title: Translation failed
+                      detail: Step 'Table input' in aggregate_sales.ktr references a connection that is not defined.
+                    result: null
+        '304': { description: Not modified. }
+        '404': { $ref: '#/components/responses/Problem' }
+    patch:
+      tags: [Migrations]
+      operationId: updateMigrationSettings
+      summary: Update settings
+      description: Partial update of the settings. Allowed only in `draft`.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/Settings' }
+            example: { targetVersion: IBM DataStage 11.7, projectName: SALES_DWH, useFunctionalDoc: true }
+      responses:
+        '200':
+          description: Updated migration.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Migration' }
+        '404': { $ref: '#/components/responses/Problem' }
+        '409': { $ref: '#/components/responses/Problem' }
+        '422': { $ref: '#/components/responses/Problem' }
+
+  /migrations/{migrationId}/files:
+    parameters:
+      - $ref: '#/components/parameters/MigrationId'
+    post:
+      tags: [Files]
+      operationId: uploadFile
+      summary: Upload an input file
+      description: |
+        Uploads one file. Validation runs synchronously. A file with the wrong extension or no
+        content is rejected with `422`. For `ktr` and `kjb`, uploading a file with the same name
+        replaces the previous one. For `doc` there is at most one file, and a new upload replaces it.
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [kind, file]
+              properties:
+                kind: { $ref: '#/components/schemas/FileKind' }
+                file: { type: string, contentEncoding: base64, contentMediaType: application/octet-stream }
+      responses:
+        '201':
+          description: Stored and valid.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/InputFile' }
+              example: { id: fil_7F3A, kind: ktr, name: load_customers.ktr, sizeBytes: 49152, status: valid }
+        '404': { $ref: '#/components/responses/Problem' }
+        '409': { $ref: '#/components/responses/Problem' }
+        '413': { $ref: '#/components/responses/Problem' }
+        '422':
+          description: The file is invalid.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/Problem' }
+              examples:
+                empty:
+                  value:
+                    type: https://migrations.example.com/problems/invalid-file
+                    title: File is empty
+                    status: 422
+                    detail: This file has no content. Export it again from Pentaho.
+                wrongType:
+                  value:
+                    type: https://migrations.example.com/problems/invalid-file
+                    title: Invalid file type
+                    status: 422
+                    detail: Upload a Pentaho transformation file with the .ktr extension.
+
+  /migrations/{migrationId}/files/{fileId}:
+    parameters:
+      - $ref: '#/components/parameters/MigrationId'
+      - name: fileId
+        in: path
+        required: true
+        schema: { type: string }
+    delete:
+      tags: [Files]
+      operationId: deleteFile
+      summary: Remove an input file
+      description: Allowed only in `draft`. Deleting an unknown file returns `204`.
+      responses:
+        '204': { description: Removed. }
+        '404': { $ref: '#/components/responses/Problem' }
+        '409': { $ref: '#/components/responses/Problem' }
+
+  /migrations/{migrationId}/start:
+    parameters:
+      - $ref: '#/components/parameters/MigrationId'
+    post:
+      tags: [Migrations]
+      operationId: startMigration
+      summary: Start the translation
+      description: |
+        Queues the translation. Requires at least one valid `ktr`, one valid `kjb` and one `doc`.
+        The request body is optional; any settings it carries are applied before starting.
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/Settings' }
+      responses:
+        '202':
+          description: Accepted. Poll the migration for progress.
+          headers:
+            Location: { schema: { type: string, format: uri-reference } }
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Migration' }
+        '404': { $ref: '#/components/responses/Problem' }
+        '409':
+          description: Inputs are missing or the migration is not in `draft`.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/Problem' }
+              example:
+                type: https://migrations.example.com/problems/inputs-missing
+                title: Inputs are missing
+                status: 409
+                detail: Upload all three inputs to start the translation.
+                missing: [kjb, doc]
+        '422': { $ref: '#/components/responses/Problem' }
+
+  /migrations/{migrationId}/cancel:
+    parameters:
+      - $ref: '#/components/parameters/MigrationId'
+    post:
+      tags: [Migrations]
+      operationId: cancelMigration
+      summary: Cancel a running translation
+      description: Stops work and returns the migration to `draft`. Files and settings are kept.
+      responses:
+        '202':
+          description: Cancellation accepted. `status` becomes `draft` once work has stopped.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Migration' }
+        '404': { $ref: '#/components/responses/Problem' }
+        '409': { $ref: '#/components/responses/Problem' }
+
+  /migrations/{migrationId}/result/download:
+    parameters:
+      - $ref: '#/components/parameters/MigrationId'
+    get:
+      tags: [Result]
+      operationId: downloadResult
+      summary: Download the .dsx export
+      responses:
+        '200':
+          description: The export file.
+          headers:
+            Content-Disposition:
+              description: 'attachment; filename="<result.artifact.fileName>"'
+              schema: { type: string }
+          content:
+            application/octet-stream:
+              schema: { type: string, format: binary }
+        '404': { $ref: '#/components/responses/Problem' }
+        '409':
+          description: The migration has not succeeded yet.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/Problem' }
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      description: Also acceptable for the gateway - an API key header, or HTTP basic. Match whatever Gateway settings are configured with.
+
+  parameters:
+    MigrationId:
+      name: migrationId
+      in: path
+      required: true
+      schema: { type: string, examples: [mig_01J9Z8K2Q] }
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: false
+      description: Repeating a request with the same key within 24 hours returns the original response instead of doing the work again.
+      schema: { type: string, maxLength: 255 }
+
+  responses:
+    Problem:
+      description: Error, as RFC 9457 problem details.
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/Problem' }
+
+  schemas:
+    MigrationStatus:
+      type: string
+      enum: [draft, queued, running, succeeded, failed, cancelled]
+      description: |
+        `cancelled` is reported only transiently or in history; an active cancel returns to `draft`.
+        Clients treat unknown values as `running`.
+
+    FileKind:
+      type: string
+      enum: [ktr, kjb, doc]
+      description: '`ktr` Pentaho transformation, `kjb` Pentaho job, `doc` functional document (.pdf, .docx, .doc, .md, .txt).'
+
+    Settings:
+      type: object
+      properties:
+        targetVersion:
+          type: string
+          enum: [IBM DataStage 11.7, IBM DataStage on Cloud Pak for Data, IBM DataStage as a Service]
+        projectName:
+          type: [string, 'null']
+          maxLength: 128
+          examples: [SALES_DWH]
+        useFunctionalDoc:
+          type: boolean
+          description: Use the functional document to name stages and add job annotations.
+
+    InputFile:
+      type: object
+      required: [id, kind, name, sizeBytes, status]
+      properties:
+        id: { type: string }
+        kind: { $ref: '#/components/schemas/FileKind' }
+        name: { type: string }
+        sizeBytes: { type: integer, minimum: 0 }
+        status: { type: string, enum: [valid] }
+
+    Step:
+      type: object
+      required: [key, label, status]
+      properties:
+        key: { type: string, examples: [parse_ktr] }
+        label: { type: string }
+        status: { type: string, enum: [pending, running, succeeded, failed] }
+        detail: { type: string }
+
+    Progress:
+      type: object
+      required: [percent]
+      properties:
+        percent: { type: integer, minimum: 0, maximum: 100 }
+        steps:
+          type: array
+          items: { $ref: '#/components/schemas/Step' }
+          description: The pipeline steps in order. May be empty before the migration starts.
+
+    ResultItem:
+      type: object
+      required: [source, target, status]
+      properties:
+        source:
+          type: object
+          required: [name, type]
+          properties:
+            name: { type: string }
+            type: { type: string, enum: [Job, Transformation] }
+        target:
+          type: object
+          required: [name, type]
+          properties:
+            name: { type: string }
+            type: { type: string, enum: [Sequence job, Parallel job] }
+        status: { type: string, enum: [ready_for_review] }
+
+    Result:
+      type: object
+      required: [artifact, summary, items]
+      properties:
+        artifact:
+          type: object
+          required: [fileName, sizeBytes, downloadUrl]
+          properties:
+            fileName: { type: string, examples: [daily_sales_load.dsx] }
+            sizeBytes: { type: integer }
+            downloadUrl: { type: string, format: uri-reference }
+        summary:
+          type: object
+          required: [sequenceJobs, parallelJobs]
+          properties:
+            sequenceJobs: { type: integer, minimum: 0 }
+            parallelJobs: { type: integer, minimum: 0 }
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/ResultItem' }
+
+    Migration:
+      type: object
+      required: [id, status, createdAt, updatedAt, settings, progress, error, result]
+      properties:
+        id: { type: string }
+        status: { $ref: '#/components/schemas/MigrationStatus' }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+        settings: { $ref: '#/components/schemas/Settings' }
+        progress: { $ref: '#/components/schemas/Progress' }
+        error:
+          description: Set only when `status` is `failed`.
+          oneOf:
+            - type: 'null'
+            - $ref: '#/components/schemas/Problem'
+        result:
+          description: Set only when `status` is `succeeded`.
+          oneOf:
+            - type: 'null'
+            - $ref: '#/components/schemas/Result'
+        links:
+          type: object
+          properties:
+            self: { type: string, format: uri-reference }
+
+    Problem:
+      type: object
+      required: [type, title, status]
+      description: RFC 9457 problem details. Extra members are allowed (for example `missing`).
+      properties:
+        type: { type: string, format: uri, description: Stable identifier for the error class. }
+        title: { type: string }
+        status: { type: integer }
+        detail: { type: string, description: Human-readable, safe to show to the user. }
+        instance: { type: string }
+      additionalProperties: true

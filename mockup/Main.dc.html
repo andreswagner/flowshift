@@ -1,0 +1,549 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Pentaho to DataStage migration</title>
+<script src="./vendor/react.js"></script>
+<script src="./vendor/react-dom.js"></script>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/carbon/components/colors_and_type.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0;background:#ffffff}
+a{color:#0f62fe;text-decoration:none}a:hover{color:#0043ce;text-decoration:underline}
+.vh{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0,0,0,0);border:0}
+.dz{cursor:pointer;transition:background-color 110ms cubic-bezier(0.2,0,0.38,0.9)}
+.dz:hover{background:#e8e8e8}
+.dz:focus-within{outline:2px solid #0f62fe;outline-offset:-2px}
+.btn{font-family:inherit;font-size:14px;letter-spacing:0.16px;border:0;border-radius:0;cursor:pointer;min-height:48px;display:flex;align-items:center;justify-content:space-between;gap:32px;padding:0 16px;text-align:left;box-sizing:border-box;transition:background-color 70ms cubic-bezier(0.2,0,0.38,0.9)}
+.btn:focus-visible{outline:2px solid #0f62fe;outline-offset:-2px;box-shadow:inset 0 0 0 3px #ffffff}
+.btn-primary{background:#0f62fe;color:#ffffff}.btn-primary:hover{background:#0353e9}.btn-primary:active{background:#002d9c}
+.btn-primary:disabled{background:#c6c6c6;color:#8d8d8d;cursor:not-allowed}
+.btn-secondary{background:#393939;color:#ffffff}.btn-secondary:hover{background:#4c4c4c}
+.btn-tertiary{background:transparent;color:#0f62fe;box-shadow:inset 0 0 0 1px #0f62fe}.btn-tertiary:hover{background:#0353e9;color:#ffffff}
+.btn-ghost{background:transparent;color:#0f62fe;min-height:40px}.btn-ghost:hover{background:#e8e8e8;color:#0043ce}
+.hdr-btn{width:48px;height:48px;background:transparent;border:0;color:#f4f4f4;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0}
+.hdr-btn:hover{background:#353535}.hdr-btn:focus-visible{outline:2px solid #ffffff;outline-offset:-2px}
+.hdr-link{color:#c6c6c6;font-size:14px;letter-spacing:0.16px;height:48px;display:flex;align-items:center;padding:0 16px;text-decoration:none}
+.hdr-link:hover{background:#353535;color:#f4f4f4;text-decoration:none}
+.icon-btn{width:32px;height:32px;background:transparent;border:0;color:#161616;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0;flex-shrink:0}
+.icon-btn:hover{background:#e8e8e8}.icon-btn:focus-visible{outline:2px solid #0f62fe;outline-offset:-2px}
+.fld{font-family:inherit;font-size:14px;letter-spacing:0.16px;height:40px;width:100%;box-sizing:border-box;background:#ffffff;border:0;border-bottom:1px solid #8d8d8d;border-radius:0;padding:0 16px;color:#161616;outline:none}
+.fld:focus{outline:2px solid #0f62fe;outline-offset:-2px}
+.fld:disabled{color:rgba(22,22,22,0.25);border-bottom-color:transparent;cursor:not-allowed}
+.spin{animation:cds-spin 690ms linear infinite;transform-origin:50% 50%}
+@keyframes cds-spin{to{transform:rotate(360deg)}}
+.bar{transition:width 400ms cubic-bezier(0.4,0.14,0.3,1)}
+.tbl{width:100%;border-collapse:collapse;font-size:14px;letter-spacing:0.16px}
+.tbl th{background:#e0e0e0;text-align:left;font-weight:600;height:48px;padding:0 16px;color:#161616}
+.tbl td{height:48px;padding:0 16px;border-top:1px solid #e0e0e0;color:#525252;background:#f4f4f4}
+.tbl tr:hover td{background:#e8e8e8;color:#161616}
+</style>
+</helmet>
+<div style="font-family: var(--cds-font-sans); color: #161616; background: #ffffff; min-height: 100vh; display: flex; flex-direction: column">
+
+  <header style="height: 48px; background: #161616; display: flex; align-items: center; border-bottom: 1px solid #393939; flex-wrap: nowrap; overflow: hidden">
+    <a href="#" style="display: flex; align-items: center; gap: 4px; height: 48px; padding: 0 32px 0 16px; color: #f4f4f4; font-size: 14px; letter-spacing: 0.1px; text-decoration: none; white-space: nowrap; border-right: 1px solid #393939">
+      <span style="font-weight: 400">IBM</span><span style="font-weight: 600">DataStage</span>
+    </a>
+    <nav aria-label="Main" style="display: flex; flex: 1 1 auto; min-width: 0; overflow: hidden">
+      <a class="hdr-link" href="#" style="color: #f4f4f4; box-shadow: inset 0 -3px 0 #0f62fe; background: #262626">Migrations</a>
+      <a class="hdr-link" href="#">Projects</a>
+      <a class="hdr-link" href="#">Jobs</a>
+    </nav>
+    <div style="display: flex">
+      <button class="hdr-btn" aria-label="Help"><svg width="20" height="20" viewBox="0 0 32 32" fill="currentColor"><path d="M16,2A14,14,0,1,0,30,16,14,14,0,0,0,16,2Zm0,26A12,12,0,1,1,28,16,12,12,0,0,1,16,28Z"></path><circle cx="16" cy="23.5" r="1.5"></circle><path d="M17,8H15.5A4.49,4.49,0,0,0,11,12.5V13h2v-.5A2.5,2.5,0,0,1,15.5,10H17a2.5,2.5,0,0,1,0,5H15v4.5h2V17a4.5,4.5,0,0,0,0-9Z"></path></svg></button>
+      <button class="hdr-btn" aria-label="Notifications"><svg width="20" height="20" viewBox="0 0 32 32" fill="currentColor"><path d="M28.7071,19.293,26,16.5859V13a10.0136,10.0136,0,0,0-9-9.9492V1H15V3.0508A10.0136,10.0136,0,0,0,6,13v3.5859L3.2929,19.293A1,1,0,0,0,3,20v3a1,1,0,0,0,1,1h7v.7768a5.152,5.152,0,0,0,4.5,5.1987A5.0057,5.0057,0,0,0,21,25V24h7a1,1,0,0,0,1-1V20A1,1,0,0,0,28.7071,19.293ZM19,25a3,3,0,0,1-6,0V24h6Zm8-3H5V20.4141L7.707,17.707A1,1,0,0,0,8,17V13a8,8,0,0,1,16,0v4a1,1,0,0,0,.293.707L27,20.4141Z"></path></svg></button>
+      <button class="hdr-btn" aria-label="User profile"><svg width="20" height="20" viewBox="0 0 32 32" fill="currentColor"><path d="M16,8a5,5,0,1,0,5,5A5,5,0,0,0,16,8Zm0,8a3,3,0,1,1,3-3A3.0034,3.0034,0,0,1,16,16Z"></path><path d="M16,2A14,14,0,1,0,30,16,14.0158,14.0158,0,0,0,16,2ZM10,26.3765V25a3.0033,3.0033,0,0,1,3-3h6a3.0033,3.0033,0,0,1,3,3v1.3765a11.8989,11.8989,0,0,1-12,0Zm13.9925-1.4507A5.0016,5.0016,0,0,0,19,20H13a5.0016,5.0016,0,0,0-4.9925,4.9258,12,12,0,1,1,15.985,0Z"></path></svg></button>
+    </div>
+  </header>
+
+  <main style="width: 100%; max-width: 1312px; margin: 0 auto; box-sizing: border-box; padding: 24px 16px 64px; display: flex; flex-direction: column; gap: 32px">
+
+    <div style="display: flex; flex-direction: column; gap: 8px">
+      <nav aria-label="Breadcrumb" style="display: flex; gap: 8px; font-size: 14px; letter-spacing: 0.16px; color: #525252">
+        <a href="#">Migrations</a><span>/</span><span>New migration</span>
+      </nav>
+      <h1 style="margin: 8px 0 0; font-size: 32px; line-height: 40px; font-weight: 400">Migrate a Pentaho flow to DataStage</h1>
+      <p style="margin: 0; max-width: 720px; font-size: 16px; line-height: 24px; color: #525252">Upload the Pentaho transformations, the job that orchestrates them and the functional document that describes them. We translate everything into a single DataStage .dsx export you can import into your project.</p>
+    </div>
+
+    <ol aria-label="Migration progress" style="list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; max-width: 880px">
+      <sc-for list="{{progSteps}}" as="p" hint-placeholder-count="3">
+        <li style="display: flex; flex-direction: column; gap: 8px">
+          <div style="height: 2px; background: {{p.line}}"></div>
+          <div style="display: flex; gap: 8px; align-items: flex-start">
+            <sc-if value="{{p.done}}" hint-placeholder-val="{{false}}">
+              <svg width="16" height="16" viewBox="0 0 32 32" fill="#0f62fe" style="flex-shrink: 0; margin-top: 2px"><path d="M14 21.414L9 16.413 10.413 15 14 18.586 21.585 11 23 12.415 14 21.414z"></path><path d="M16,2A14,14,0,1,0,30,16,14,14,0,0,0,16,2Zm0,26A12,12,0,1,1,28,16,12,12,0,0,1,16,28Z"></path></svg>
+            </sc-if>
+            <sc-if value="{{p.current}}" hint-placeholder-val="{{false}}">
+              <svg width="16" height="16" viewBox="0 0 32 32" fill="#0f62fe" style="flex-shrink: 0; margin-top: 2px"><path d="M16,2A14,14,0,1,0,30,16,14,14,0,0,0,16,2Zm0,26A12,12,0,1,1,28,16,12,12,0,0,1,16,28Z"></path><circle cx="16" cy="16" r="7"></circle></svg>
+            </sc-if>
+            <sc-if value="{{p.todo}}" hint-placeholder-val="{{true}}">
+              <svg width="16" height="16" viewBox="0 0 32 32" fill="#161616" style="flex-shrink: 0; margin-top: 2px"><path d="M16,2A14,14,0,1,0,30,16,14,14,0,0,0,16,2Zm0,26A12,12,0,1,1,28,16,12,12,0,0,1,16,28Z"></path></svg>
+            </sc-if>
+            <div style="display: flex; flex-direction: column; gap: 2px">
+              <span style="font-size: 14px; line-height: 20px; letter-spacing: 0.16px; font-weight: {{p.weight}}">{{p.label}}</span>
+              <span style="font-size: 12px; line-height: 16px; letter-spacing: 0.32px; color: #6f6f6f">{{p.sub}}</span>
+            </div>
+          </div>
+        </li>
+      </sc-for>
+    </ol>
+
+    <div style="display: flex; flex-wrap: wrap; gap: 32px; align-items: flex-start">
+
+      <div style="flex: 999 1 560px; min-width: 0; display: flex; flex-direction: column; gap: 16px">
+
+        <sc-if value="{{isUpload}}" hint-placeholder-val="{{true}}">
+          <div style="display: flex; flex-direction: column; gap: 16px">
+
+            <section aria-labelledby="sec-ktr" style="background: #f4f4f4; padding: 24px; display: flex; flex-direction: column; gap: 16px">
+              <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; flex-wrap: wrap">
+                <div style="display: flex; flex-direction: column; gap: 4px">
+                  <h2 id="sec-ktr" style="margin: 0; font-size: 16px; line-height: 22px; font-weight: 600">Transformations</h2>
+                  <p style="margin: 0; font-size: 14px; line-height: 20px; letter-spacing: 0.16px; color: #525252; max-width: 560px">Upload every .ktr file the job calls. You can add several at once.</p>
+                </div>
+                <span style="background: #e0e0e0; color: #393939; font-size: 12px; letter-spacing: 0.32px; height: 24px; padding: 0 8px; display: inline-flex; align-items: center; border-radius: 12px">.ktr · Required</span>
+              </div>
+              <label class="dz" style="{{zone.ktr}}" onDragOver="{{over.ktr}}" onDragLeave="{{leave}}" onDrop="{{drop.ktr}}">
+                <input class="vh" type="file" accept=".ktr" multiple="{{yes}}" onChange="{{pick.ktr}}">
+                <svg width="20" height="20" viewBox="0 0 32 32" fill="#0f62fe"><path d="M6 18L7.41 19.41 15 11.83 15 30 17 30 17 11.83 24.59 19.41 26 18 16 8 6 18z"></path><path d="M6 8V4H26V8H28V4a2 2 0 00-2-2H6A2 2 0 004 4V8z"></path></svg>
+                <span style="font-size: 14px; letter-spacing: 0.16px; color: #161616"><span style="color: #0f62fe">Drag and drop .ktr files here</span> or click to upload</span>
+              </label>
+              <sc-if value="{{has.ktr}}" hint-placeholder-val="{{false}}">
+                <ul style="list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px">
+                  <sc-for list="{{files.ktr}}" as="f" hint-placeholder-count="2">
+                    <li style="{{f.itemStyle}}">
+                      <div style="display: flex; align-items: center; gap: 12px; min-height: 48px; padding: 0 8px 0 16px">
+                        <svg width="16" height="16" viewBox="0 0 32 32" fill="#525252" style="flex-shrink: 0"><path d="M25.7,9.3l-7-7A.9087.9087,0,0,0,18,2H8A2.0058,2.0058,0,0,0,6,4V28a2.0058,2.0058,0,0,0,2,2H24a2.0058,2.0058,0,0,0,2-2V10A.9092.9092,0,0,0,25.7,9.3ZM18,4.4,23.6,10H18ZM24,28H8V4h8v6a2.0058,2.0058,0,0,0,2,2h6Z"></path></svg>
+                        <span style="flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 14px; letter-spacing: 0.16px">{{f.name}}</span>
+                        <span style="font-size: 12px; letter-spacing: 0.32px; color: #6f6f6f; white-space: nowrap">{{f.sizeLabel}}</span>
+                        <sc-if value="{{f.ok}}" hint-placeholder-val="{{true}}">
+                          <svg width="16" height="16" viewBox="0 0 32 32" fill="#0f62fe" aria-label="Uploaded" style="flex-shrink: 0; margin: 0 8px"><path d="M16,2A14,14,0,1,0,30,16,14,14,0,0,0,16,2ZM14,21.5908l-5-5L10.5906,15,14,18.4092,21.41,11l1.5957,1.5859Z"></path></svg>
+                        </sc-if>
+                        <sc-if value="{{f.bad}}" hint-placeholder-val="{{false}}">
+                          <svg width="16" height="16" viewBox="0 0 32 32" fill="#da1e28" aria-label="Invalid file" style="flex-shrink: 0; margin: 0 8px"><path d="M16,2C8.3,2,2,8.3,2,16s6.3,14,14,14s14-6.3,14-14S23.7,2,16,2z M21.4,23L16,17.6L10.6,23L9,21.4l5.4-5.4L9,10.6L10.6,9l5.4,5.4L21.4,9l1.6,1.6L17.6,16l5.4,5.4L21.4,23z"></path></svg>
+                        </sc-if>
+                        <button class="icon-btn" aria-label="Remove file" onClick="{{f.remove}}"><svg width="16" height="16" viewBox="0 0 32 32" fill="currentColor"><path d="M17.4141 16L24 9.4141 22.5859 8 16 14.5859 9.4143 8 8 9.4141 14.5859 16 8 22.5859 9.4143 24 16 17.4141 22.5859 24 24 22.5859 17.4141 16z"></path></svg></button>
+                      </div>
+                      <sc-if value="{{f.bad}}" hint-placeholder-val="{{false}}">
+                        <div style="border-top: 1px solid #e0e0e0; padding: 8px 16px 12px; display: flex; flex-direction: column; gap: 2px">
+                          <span style="font-size: 14px; font-weight: 600; letter-spacing: 0.16px; color: #161616">{{f.errTitle}}</span>
+                          <span style="font-size: 12px; letter-spacing: 0.32px; color: #525252">{{f.errText}}</span>
+                        </div>
+                      </sc-if>
+                    </li>
+                  </sc-for>
+                </ul>
+              </sc-if>
+            </section>
+
+            <section aria-labelledby="sec-kjb" style="background: #f4f4f4; padding: 24px; display: flex; flex-direction: column; gap: 16px">
+              <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; flex-wrap: wrap">
+                <div style="display: flex; flex-direction: column; gap: 4px">
+                  <h2 id="sec-kjb" style="margin: 0; font-size: 16px; line-height: 22px; font-weight: 600">Jobs</h2>
+                  <p style="margin: 0; font-size: 14px; line-height: 20px; letter-spacing: 0.16px; color: #525252; max-width: 560px">Upload every .kjb file that orchestrates the transformations. You can add several at once. Each job becomes a DataStage sequence job.</p>
+                </div>
+                <span style="background: #e0e0e0; color: #393939; font-size: 12px; letter-spacing: 0.32px; height: 24px; padding: 0 8px; display: inline-flex; align-items: center; border-radius: 12px">.kjb · Required</span>
+              </div>
+              <label class="dz" style="{{zone.kjb}}" onDragOver="{{over.kjb}}" onDragLeave="{{leave}}" onDrop="{{drop.kjb}}">
+                <input class="vh" type="file" accept=".kjb" multiple="{{yes}}" onChange="{{pick.kjb}}">
+                <svg width="20" height="20" viewBox="0 0 32 32" fill="#0f62fe"><path d="M6 18L7.41 19.41 15 11.83 15 30 17 30 17 11.83 24.59 19.41 26 18 16 8 6 18z"></path><path d="M6 8V4H26V8H28V4a2 2 0 00-2-2H6A2 2 0 004 4V8z"></path></svg>
+                <span style="font-size: 14px; letter-spacing: 0.16px; color: #161616"><span style="color: #0f62fe">Drag and drop .kjb files here</span> or click to upload</span>
+              </label>
+              <sc-if value="{{has.kjb}}" hint-placeholder-val="{{false}}">
+                <ul style="list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px">
+                  <sc-for list="{{files.kjb}}" as="f" hint-placeholder-count="2">
+                    <li style="{{f.itemStyle}}">
+                      <div style="display: flex; align-items: center; gap: 12px; min-height: 48px; padding: 0 8px 0 16px">
+                        <svg width="16" height="16" viewBox="0 0 32 32" fill="#525252" style="flex-shrink: 0"><path d="M25.7,9.3l-7-7A.9087.9087,0,0,0,18,2H8A2.0058,2.0058,0,0,0,6,4V28a2.0058,2.0058,0,0,0,2,2H24a2.0058,2.0058,0,0,0,2-2V10A.9092.9092,0,0,0,25.7,9.3ZM18,4.4,23.6,10H18ZM24,28H8V4h8v6a2.0058,2.0058,0,0,0,2,2h6Z"></path></svg>
+                        <span style="flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 14px; letter-spacing: 0.16px">{{f.name}}</span>
+                        <span style="font-size: 12px; letter-spacing: 0.32px; color: #6f6f6f; white-space: nowrap">{{f.sizeLabel}}</span>
+                        <sc-if value="{{f.ok}}" hint-placeholder-val="{{true}}">
+                          <svg width="16" height="16" viewBox="0 0 32 32" fill="#0f62fe" aria-label="Uploaded" style="flex-shrink: 0; margin: 0 8px"><path d="M16,2A14,14,0,1,0,30,16,14,14,0,0,0,16,2ZM14,21.5908l-5-5L10.5906,15,14,18.4092,21.41,11l1.5957,1.5859Z"></path></svg>
+                        </sc-if>
+                        <sc-if value="{{f.bad}}" hint-placeholder-val="{{false}}">
+                          <svg width="16" height="16" viewBox="0 0 32 32" fill="#da1e28" aria-label="Invalid file" style="flex-shrink: 0; margin: 0 8px"><path d="M16,2C8.3,2,2,8.3,2,16s6.3,14,14,14s14-6.3,14-14S23.7,2,16,2z M21.4,23L16,17.6L10.6,23L9,21.4l5.4-5.4L9,10.6L10.6,9l5.4,5.4L21.4,9l1.6,1.6L17.6,16l5.4,5.4L21.4,23z"></path></svg>
+                        </sc-if>
+                        <button class="icon-btn" aria-label="Remove file" onClick="{{f.remove}}"><svg width="16" height="16" viewBox="0 0 32 32" fill="currentColor"><path d="M17.4141 16L24 9.4141 22.5859 8 16 14.5859 9.4143 8 8 9.4141 14.5859 16 8 22.5859 9.4143 24 16 17.4141 22.5859 24 24 22.5859 17.4141 16z"></path></svg></button>
+                      </div>
+                      <sc-if value="{{f.bad}}" hint-placeholder-val="{{false}}">
+                        <div style="border-top: 1px solid #e0e0e0; padding: 8px 16px 12px; display: flex; flex-direction: column; gap: 2px">
+                          <span style="font-size: 14px; font-weight: 600; letter-spacing: 0.16px; color: #161616">{{f.errTitle}}</span>
+                          <span style="font-size: 12px; letter-spacing: 0.32px; color: #525252">{{f.errText}}</span>
+                        </div>
+                      </sc-if>
+                    </li>
+                  </sc-for>
+                </ul>
+              </sc-if>
+            </section>
+
+            <section aria-labelledby="sec-doc" style="background: #f4f4f4; padding: 24px; display: flex; flex-direction: column; gap: 16px">
+              <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; flex-wrap: wrap">
+                <div style="display: flex; flex-direction: column; gap: 4px">
+                  <h2 id="sec-doc" style="margin: 0; font-size: 16px; line-height: 22px; font-weight: 600">Functional document</h2>
+                  <p style="margin: 0; font-size: 14px; line-height: 20px; letter-spacing: 0.16px; color: #525252; max-width: 560px">Upload the document that describes the flows and the job. We use it to name stages, add annotations and resolve business rules.</p>
+                </div>
+                <span style="background: #e0e0e0; color: #393939; font-size: 12px; letter-spacing: 0.32px; height: 24px; padding: 0 8px; display: inline-flex; align-items: center; border-radius: 12px">.pdf, .docx, .md · Required</span>
+              </div>
+              <label class="dz" style="{{zone.doc}}" onDragOver="{{over.doc}}" onDragLeave="{{leave}}" onDrop="{{drop.doc}}">
+                <input class="vh" type="file" accept=".pdf,.docx,.doc,.md,.txt" onChange="{{pick.doc}}">
+                <svg width="20" height="20" viewBox="0 0 32 32" fill="#0f62fe"><path d="M6 18L7.41 19.41 15 11.83 15 30 17 30 17 11.83 24.59 19.41 26 18 16 8 6 18z"></path><path d="M6 8V4H26V8H28V4a2 2 0 00-2-2H6A2 2 0 004 4V8z"></path></svg>
+                <span style="font-size: 14px; letter-spacing: 0.16px; color: #161616"><span style="color: #0f62fe">Drag and drop a document here</span> or click to upload</span>
+              </label>
+              <sc-if value="{{has.doc}}" hint-placeholder-val="{{false}}">
+                <ul style="list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px">
+                  <sc-for list="{{files.doc}}" as="f" hint-placeholder-count="1">
+                    <li style="{{f.itemStyle}}">
+                      <div style="display: flex; align-items: center; gap: 12px; min-height: 48px; padding: 0 8px 0 16px">
+                        <svg width="16" height="16" viewBox="0 0 32 32" fill="#525252" style="flex-shrink: 0"><path d="M25.7,9.3l-7-7A.9087.9087,0,0,0,18,2H8A2.0058,2.0058,0,0,0,6,4V28a2.0058,2.0058,0,0,0,2,2H24a2.0058,2.0058,0,0,0,2-2V10A.9092.9092,0,0,0,25.7,9.3ZM18,4.4,23.6,10H18ZM24,28H8V4h8v6a2.0058,2.0058,0,0,0,2,2h6Z"></path><path d="M10 22H22V24H10z"></path><path d="M10 16H22V18H10z"></path></svg>
+                        <span style="flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 14px; letter-spacing: 0.16px">{{f.name}}</span>
+                        <span style="font-size: 12px; letter-spacing: 0.32px; color: #6f6f6f; white-space: nowrap">{{f.sizeLabel}}</span>
+                        <sc-if value="{{f.ok}}" hint-placeholder-val="{{true}}">
+                          <svg width="16" height="16" viewBox="0 0 32 32" fill="#0f62fe" aria-label="Uploaded" style="flex-shrink: 0; margin: 0 8px"><path d="M16,2A14,14,0,1,0,30,16,14,14,0,0,0,16,2ZM14,21.5908l-5-5L10.5906,15,14,18.4092,21.41,11l1.5957,1.5859Z"></path></svg>
+                        </sc-if>
+                        <sc-if value="{{f.bad}}" hint-placeholder-val="{{false}}">
+                          <svg width="16" height="16" viewBox="0 0 32 32" fill="#da1e28" aria-label="Invalid file" style="flex-shrink: 0; margin: 0 8px"><path d="M16,2C8.3,2,2,8.3,2,16s6.3,14,14,14s14-6.3,14-14S23.7,2,16,2z M21.4,23L16,17.6L10.6,23L9,21.4l5.4-5.4L9,10.6L10.6,9l5.4,5.4L21.4,9l1.6,1.6L17.6,16l5.4,5.4L21.4,23z"></path></svg>
+                        </sc-if>
+                        <button class="icon-btn" aria-label="Remove file" onClick="{{f.remove}}"><svg width="16" height="16" viewBox="0 0 32 32" fill="currentColor"><path d="M17.4141 16L24 9.4141 22.5859 8 16 14.5859 9.4143 8 8 9.4141 14.5859 16 8 22.5859 9.4143 24 16 17.4141 22.5859 24 24 22.5859 17.4141 16z"></path></svg></button>
+                      </div>
+                      <sc-if value="{{f.bad}}" hint-placeholder-val="{{false}}">
+                        <div style="border-top: 1px solid #e0e0e0; padding: 8px 16px 12px; display: flex; flex-direction: column; gap: 2px">
+                          <span style="font-size: 14px; font-weight: 600; letter-spacing: 0.16px; color: #161616">{{f.errTitle}}</span>
+                          <span style="font-size: 12px; letter-spacing: 0.32px; color: #525252">{{f.errText}}</span>
+                        </div>
+                      </sc-if>
+                    </li>
+                  </sc-for>
+                </ul>
+              </sc-if>
+            </section>
+
+          </div>
+        </sc-if>
+
+        <sc-if value="{{isTranslating}}" hint-placeholder-val="{{false}}">
+          <section aria-labelledby="sec-run" aria-live="polite" style="background: #f4f4f4; padding: 24px; display: flex; flex-direction: column; gap: 24px">
+            <div style="display: flex; flex-direction: column; gap: 4px">
+              <h2 id="sec-run" style="margin: 0; font-size: 20px; line-height: 28px; font-weight: 400">Translating your flow</h2>
+              <p style="margin: 0; font-size: 14px; line-height: 20px; letter-spacing: 0.16px; color: #525252">You can leave this page. We notify you when the .dsx file is ready.</p>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 8px">
+              <div style="display: flex; justify-content: space-between; font-size: 14px; letter-spacing: 0.16px">
+                <span>{{runLabel}}</span><span style="color: #525252">{{pctLabel}}</span>
+              </div>
+              <div role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="{{pct}}" aria-label="Translation progress" style="height: 8px; background: #c6c6c6">
+                <div class="bar" style="height: 8px; background: #0f62fe; width: {{pctWidth}}"></div>
+              </div>
+            </div>
+            <ol style="list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; background: #ffffff">
+              <sc-for list="{{runSteps}}" as="s" hint-placeholder-count="5">
+                <li style="display: flex; gap: 16px; align-items: flex-start; padding: 16px; border-top: 1px solid #e0e0e0">
+                  <sc-if value="{{s.done}}" hint-placeholder-val="{{false}}">
+                    <svg width="20" height="20" viewBox="0 0 32 32" fill="#24a148" style="flex-shrink: 0"><path d="M16,2A14,14,0,1,0,30,16,14,14,0,0,0,16,2ZM14,21.5908l-5-5L10.5906,15,14,18.4092,21.41,11l1.5957,1.5859Z"></path></svg>
+                  </sc-if>
+                  <sc-if value="{{s.active}}" hint-placeholder-val="{{false}}">
+                    <svg class="spin" width="20" height="20" viewBox="0 0 20 20" style="flex-shrink: 0"><circle cx="10" cy="10" r="8" fill="none" stroke="#e0e0e0" stroke-width="2"></circle><circle cx="10" cy="10" r="8" fill="none" stroke="#0f62fe" stroke-width="2" stroke-dasharray="20 60"></circle></svg>
+                  </sc-if>
+                  <sc-if value="{{s.pending}}" hint-placeholder-val="{{true}}">
+                    <svg width="20" height="20" viewBox="0 0 32 32" fill="#8d8d8d" style="flex-shrink: 0"><path d="M16,2A14,14,0,1,0,30,16,14,14,0,0,0,16,2Zm0,26A12,12,0,1,1,28,16,12,12,0,0,1,16,28Z"></path></svg>
+                  </sc-if>
+                  <div style="display: flex; flex-direction: column; gap: 2px; min-width: 0">
+                    <span style="font-size: 14px; line-height: 20px; letter-spacing: 0.16px; color: {{s.color}}; font-weight: {{s.weight}}">{{s.label}}</span>
+                    <span style="font-size: 12px; line-height: 16px; letter-spacing: 0.32px; color: #6f6f6f; font-family: var(--cds-font-mono)">{{s.detail}}</span>
+                  </div>
+                </li>
+              </sc-for>
+            </ol>
+          </section>
+        </sc-if>
+
+        <sc-if value="{{isComplete}}" hint-placeholder-val="{{false}}">
+          <div style="display: flex; flex-direction: column; gap: 16px">
+            <div role="status" style="background: #defbe6; border-left: 3px solid #24a148; box-shadow: inset 0 0 0 1px rgba(36,161,72,0.4); display: flex; gap: 16px; padding: 14px 16px; align-items: flex-start">
+              <svg width="20" height="20" viewBox="0 0 32 32" fill="#24a148" style="flex-shrink: 0"><path d="M16,2A14,14,0,1,0,30,16,14,14,0,0,0,16,2ZM14,21.5908l-5-5L10.5906,15,14,18.4092,21.41,11l1.5957,1.5859Z"></path></svg>
+              <p style="margin: 0; font-size: 14px; line-height: 20px; letter-spacing: 0.16px"><strong style="font-weight: 600">Translation complete.</strong> Review the generated jobs in DataStage Designer before you run them in production.</p>
+            </div>
+
+            <section aria-labelledby="sec-out" style="background: #f4f4f4; padding: 24px; display: flex; flex-direction: column; gap: 16px">
+              <h2 id="sec-out" style="margin: 0; font-size: 20px; line-height: 28px; font-weight: 400">DataStage export</h2>
+              <div style="background: #ffffff; display: flex; align-items: center; gap: 16px; padding: 16px; flex-wrap: wrap">
+                <svg width="32" height="32" viewBox="0 0 32 32" fill="#0f62fe" style="flex-shrink: 0"><path d="M25.7,9.3l-7-7A.9087.9087,0,0,0,18,2H8A2.0058,2.0058,0,0,0,6,4V28a2.0058,2.0058,0,0,0,2,2H24a2.0058,2.0058,0,0,0,2-2V10A.9092.9092,0,0,0,25.7,9.3ZM18,4.4,23.6,10H18ZM24,28H8V4h8v6a2.0058,2.0058,0,0,0,2,2h6Z"></path></svg>
+                <div style="flex: 1 1 200px; min-width: 0; display: flex; flex-direction: column; gap: 2px">
+                  <span style="font-size: 16px; line-height: 22px; font-weight: 600; font-family: var(--cds-font-mono)">{{dsxName}}</span>
+                  <span style="font-size: 12px; letter-spacing: 0.32px; color: #6f6f6f">{{dsxMeta}}</span>
+                </div>
+                <button class="btn btn-primary" onClick="{{download}}" style="min-width: 200px">
+                  <span>{{downloadLabel}}</span>
+                  <svg width="16" height="16" viewBox="0 0 32 32" fill="currentColor"><path d="M26 15L24.59 13.59 17 21.17 17 2 15 2 15 21.17 7.41 13.59 6 15 16 25 26 15z"></path><path d="M26 24v4H6V24H4v4a2 2 0 002 2H26a2 2 0 002-2V24z"></path></svg>
+                </button>
+              </div>
+              <div style="overflow-x: auto">
+                <table class="tbl">
+                  <caption style="text-align: left; font-size: 14px; font-weight: 600; letter-spacing: 0.16px; padding: 8px 0 12px">What we translated</caption>
+                  <thead>
+                    <tr><th scope="col">Pentaho source</th><th scope="col">Pentaho type</th><th scope="col">DataStage asset</th><th scope="col">Status</th></tr>
+                  </thead>
+                  <tbody>
+                    <sc-for list="{{mapRows}}" as="r" hint-placeholder-count="4">
+                      <tr>
+                        <td style="font-family: var(--cds-font-mono); font-size: 13px">{{r.source}}</td>
+                        <td>{{r.ptype}}</td>
+                        <td><span style="color: #161616">{{r.dsName}}</span><span style="color: #6f6f6f"> · {{r.dsType}}</span></td>
+                        <td><span style="background: #d0e2ff; color: #0043ce; font-size: 12px; letter-spacing: 0.32px; height: 24px; padding: 0 8px; display: inline-flex; align-items: center; border-radius: 12px; white-space: nowrap">Ready for review</span></td>
+                      </tr>
+                    </sc-for>
+                  </tbody>
+                </table>
+              </div>
+            </section>
+          </div>
+        </sc-if>
+
+      </div>
+
+      <aside aria-labelledby="sum-title" style="flex: 1 1 320px; min-width: 0; max-width: 100%; background: #f4f4f4; display: flex; flex-direction: column">
+        <div style="padding: 24px 24px 16px; display: flex; flex-direction: column; gap: 16px">
+          <h2 id="sum-title" style="margin: 0; font-size: 20px; line-height: 28px; font-weight: 400">Migration summary</h2>
+          <ul style="list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column">
+            <sc-for list="{{checklist}}" as="c" hint-placeholder-count="3">
+              <li style="display: flex; gap: 12px; align-items: flex-start; padding: 12px 0; border-bottom: 1px solid #e0e0e0">
+                <sc-if value="{{c.ok}}" hint-placeholder-val="{{false}}">
+                  <svg width="16" height="16" viewBox="0 0 32 32" fill="#24a148" aria-label="Complete" style="flex-shrink: 0; margin-top: 2px"><path d="M16,2A14,14,0,1,0,30,16,14,14,0,0,0,16,2ZM14,21.5908l-5-5L10.5906,15,14,18.4092,21.41,11l1.5957,1.5859Z"></path></svg>
+                </sc-if>
+                <sc-if value="{{c.bad}}" hint-placeholder-val="{{false}}">
+                  <svg width="16" height="16" viewBox="0 0 32 32" fill="#da1e28" aria-label="Needs attention" style="flex-shrink: 0; margin-top: 2px"><path d="M16,2C8.3,2,2,8.3,2,16s6.3,14,14,14s14-6.3,14-14S23.7,2,16,2z M21.4,23L16,17.6L10.6,23L9,21.4l5.4-5.4L9,10.6L10.6,9l5.4,5.4L21.4,9l1.6,1.6L17.6,16l5.4,5.4L21.4,23z"></path></svg>
+                </sc-if>
+                <sc-if value="{{c.missing}}" hint-placeholder-val="{{true}}">
+                  <svg width="16" height="16" viewBox="0 0 32 32" fill="#8d8d8d" aria-label="Missing" style="flex-shrink: 0; margin-top: 2px"><path d="M16,2A14,14,0,1,0,30,16,14,14,0,0,0,16,2Zm0,26A12,12,0,1,1,28,16,12,12,0,0,1,16,28Z"></path></svg>
+                </sc-if>
+                <div style="display: flex; flex-direction: column; gap: 2px; min-width: 0">
+                  <span style="font-size: 14px; line-height: 20px; letter-spacing: 0.16px; font-weight: 600">{{c.label}}</span>
+                  <span style="font-size: 12px; line-height: 16px; letter-spacing: 0.32px; color: #525252; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">{{c.detail}}</span>
+                </div>
+              </li>
+            </sc-for>
+          </ul>
+
+          <div style="display: flex; flex-direction: column; gap: 8px; padding-top: 8px">
+            <label for="ds-version" style="font-size: 12px; letter-spacing: 0.32px; color: #525252">Target DataStage version</label>
+            <select id="ds-version" class="fld" disabled="{{locked}}">
+              <option>IBM DataStage 11.7</option>
+              <option>IBM DataStage on Cloud Pak for Data</option>
+              <option>IBM DataStage as a Service</option>
+            </select>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 8px">
+            <label for="ds-project" style="font-size: 12px; letter-spacing: 0.32px; color: #525252">Target project</label>
+            <input id="ds-project" class="fld" type="text" placeholder="For example, SALES_DWH" disabled="{{locked}}">
+          </div>
+          <label style="display: flex; gap: 8px; align-items: flex-start; font-size: 14px; line-height: 20px; letter-spacing: 0.16px; cursor: pointer">
+            <input type="checkbox" checked="{{yes}}" disabled="{{locked}}" style="width: 16px; height: 16px; margin: 2px 0 0; accent-color: #161616; flex-shrink: 0">
+            <span>Use the functional document to name stages and add job annotations</span>
+          </label>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 8px; padding: 0 24px 24px">
+          <sc-if value="{{isUpload}}" hint-placeholder-val="{{true}}">
+            <div style="display: flex; flex-direction: column; gap: 8px">
+              <p style="margin: 0; font-size: 12px; line-height: 16px; letter-spacing: 0.32px; color: {{gateColor}}">{{gateMsg}}</p>
+              <button class="btn btn-primary" disabled="{{notReady}}" onClick="{{start}}" style="width: 100%">
+                <span>Start translation</span>
+                <svg width="16" height="16" viewBox="0 0 32 32" fill="currentColor"><path d="M18 6L16.57 7.393 24.15 15 4 15 4 17 24.15 17 16.57 24.573 18 26 28 16 18 6z"></path></svg>
+              </button>
+            </div>
+          </sc-if>
+          <sc-if value="{{isTranslating}}" hint-placeholder-val="{{false}}">
+            <button class="btn btn-secondary" onClick="{{cancel}}" style="width: 100%">
+              <span>Cancel translation</span>
+              <svg width="16" height="16" viewBox="0 0 32 32" fill="currentColor"><path d="M17.4141 16L24 9.4141 22.5859 8 16 14.5859 9.4143 8 8 9.4141 14.5859 16 8 22.5859 9.4143 24 16 17.4141 22.5859 24 24 22.5859 17.4141 16z"></path></svg>
+            </button>
+          </sc-if>
+          <sc-if value="{{isComplete}}" hint-placeholder-val="{{false}}">
+            <button class="btn btn-tertiary" onClick="{{reset}}" style="width: 100%">
+              <span>Start a new migration</span>
+              <svg width="16" height="16" viewBox="0 0 32 32" fill="currentColor"><path d="M17 15L17 8 15 8 15 15 8 15 8 17 15 17 15 24 17 24 17 17 24 17 24 15z"></path></svg>
+            </button>
+          </sc-if>
+        </div>
+      </aside>
+
+    </div>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"scenario":{"editor":"enum","options":["empty","ready","invalid","translating","complete"],"default":"empty","section":"Preview state"},"$preview":{"width":1440,"height":1160}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = {};
+    this.nid = 100;
+    this.timer = null;
+    this.ACCEPT = { ktr: ['.ktr'], kjb: ['.kjb'], doc: ['.pdf', '.docx', '.doc', '.md', '.txt'] };
+    this.ERR = {
+      ktr: 'Upload a Pentaho transformation file with the .ktr extension.',
+      kjb: 'Upload a Pentaho job file with the .kjb extension.',
+      doc: 'Upload a .pdf, .docx, .doc, .md or .txt document.'
+    };
+  }
+  componentWillUnmount() { if (this.timer) clearInterval(this.timer); }
+
+  mk(file, kind) {
+    const name = file.name || '';
+    const dot = name.lastIndexOf('.');
+    const ext = dot >= 0 ? name.slice(dot).toLowerCase() : '';
+    const typeOk = this.ACCEPT[kind].indexOf(ext) >= 0;
+    const empty = file.size === 0;
+    this.nid += 1;
+    return {
+      id: 'f' + this.nid, name: name, size: file.size || 0,
+      ok: typeOk && !empty,
+      errTitle: !typeOk ? 'Invalid file type' : (empty ? 'File is empty' : ''),
+      errText: !typeOk ? this.ERR[kind] : (empty ? 'This file has no content. Export it again from Pentaho.' : '')
+    };
+  }
+
+  seed(sc) {
+    const S = (n, s) => this.mk({ name: n, size: s }, n.endsWith('.kjb') ? 'kjb' : (n.endsWith('.ktr') ? 'ktr' : 'doc'));
+    const ktr = [S('load_customers.ktr', 49152), S('transform_orders.ktr', 114688), S('aggregate_sales.ktr', 77824)];
+    const kjb = [S('daily_sales_load.kjb', 9216), S('monthly_sales_close.kjb', 7168)];
+    const doc = [S('daily_sales_functional_spec.pdf', 1258291)];
+    if (sc === 'ready') return { phase: 'upload', ktr, kjb, doc, step: 0 };
+    if (sc === 'invalid') return { phase: 'upload', ktr: ktr.slice(0, 2).concat([this.mk({ name: 'aggregate_sales.xml', size: 77824 }, 'ktr')]), kjb, doc: [], step: 0 };
+    if (sc === 'translating') return { phase: 'translating', ktr, kjb, doc, step: 2 };
+    if (sc === 'complete') return { phase: 'complete', ktr, kjb, doc, step: 5 };
+    return { phase: 'upload', ktr: [], kjb: [], doc: [], step: 0 };
+  }
+
+  cur() {
+    const sc = this.props.scenario ?? 'empty';
+    if (this.state.from === sc) return this.state;
+    if (!this.seeds) this.seeds = {};
+    if (!this.seeds[sc]) this.seeds[sc] = this.seed(sc);
+    return Object.assign({}, this.seeds[sc], { from: sc, drag: null, downloaded: false });
+  }
+  upd(ch) { this.setState(Object.assign({}, this.cur(), ch)); }
+
+  add(kind, list) {
+    if (!list.length) return;
+    const s = this.cur();
+    const items = list.map((f) => this.mk(f, kind));
+    let next;
+    if (kind === 'ktr' || kind === 'kjb') next = s[kind].filter((x) => !items.some((i) => i.name === x.name)).concat(items);
+    else next = [items[items.length - 1]];
+    this.upd({ [kind]: next, drag: null });
+  }
+  remove(kind, id) { const s = this.cur(); this.upd({ [kind]: s[kind].filter((f) => f.id !== id) }); }
+
+  start() {
+    if (this.timer) clearInterval(this.timer);
+    this.upd({ phase: 'translating', step: 0, downloaded: false });
+    this.timer = setInterval(() => {
+      const n = (this.cur().step || 0) + 1;
+      if (n >= 5) { clearInterval(this.timer); this.timer = null; this.upd({ phase: 'complete', step: 5 }); }
+      else this.upd({ step: n });
+    }, 1200);
+  }
+  stop() { if (this.timer) { clearInterval(this.timer); this.timer = null; } }
+
+  renderVals() {
+    const s = this.cur();
+    const fmt = (b) => b < 1024 ? b + ' B' : (b < 1048576 ? Math.round(b / 1024) + ' KB' : (b / 1048576).toFixed(1) + ' MB');
+    const kinds = ['ktr', 'kjb', 'doc'];
+    const files = {}, has = {}, zone = {}, pick = {}, drop = {}, over = {};
+    kinds.forEach((k) => {
+      files[k] = s[k].map((f) => Object.assign({}, f, {
+        bad: !f.ok,
+        sizeLabel: fmt(f.size),
+        itemStyle: f.ok ? 'background: #ffffff' : 'background: #ffffff; outline: 2px solid #da1e28; outline-offset: -2px',
+        remove: () => this.remove(k, f.id)
+      }));
+      has[k] = s[k].length > 0;
+      const dragging = s.drag === k;
+      zone[k] = 'position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; min-height: 96px; padding: 16px; box-sizing: border-box; text-align: center; background: ' + (dragging ? '#edf5ff' : '#ffffff') + '; border: ' + (dragging ? '2px solid #0f62fe' : '1px dashed #8d8d8d');
+      pick[k] = (e) => { const l = Array.from((e.target && e.target.files) || []); this.add(k, l); if (e.target) e.target.value = ''; };
+      drop[k] = (e) => { e.preventDefault(); this.add(k, Array.from((e.dataTransfer && e.dataTransfer.files) || [])); this.upd({ drag: null }); };
+      over[k] = (e) => { e.preventDefault(); if (this.cur().drag !== k) this.upd({ drag: k }); };
+    });
+
+    const bad = (k) => s[k].some((f) => !f.ok);
+    const good = (k) => s[k].length > 0 && !bad(k);
+    const anyBad = kinds.some(bad);
+    const ready = kinds.every(good);
+    const phase = s.phase;
+    const isUpload = phase === 'upload', isTranslating = phase === 'translating', isComplete = phase === 'complete';
+
+    const okKtr = s.ktr.filter((f) => f.ok);
+    const okKjb = s.kjb.filter((f) => f.ok);
+    const plural = (n, w) => n + ' ' + w + (n === 1 ? '' : 's');
+    const checklist = [
+      { label: 'Transformations (.ktr)', detail: s.ktr.length ? plural(s.ktr.length, 'file') + (bad('ktr') ? ' · ' + plural(s.ktr.length - okKtr.length, 'invalid file') : '') : 'Not uploaded', k: 'ktr' },
+      { label: 'Jobs (.kjb)', detail: s.kjb.length ? plural(s.kjb.length, 'file') + (bad('kjb') ? ' · ' + plural(s.kjb.length - okKjb.length, 'invalid file') : '') : 'Not uploaded', k: 'kjb' },
+      { label: 'Functional document', detail: s.doc.length ? s.doc[0].name : 'Not uploaded', k: 'doc' }
+    ].map((c) => Object.assign(c, { ok: good(c.k), bad: bad(c.k), missing: s[c.k].length === 0 }));
+
+    const stemOf = (n) => n.replace(/\.kjb$/i, '');
+    const jobStem = okKjb.length === 1 ? stemOf(okKjb[0].name) : 'pentaho_migration';
+    const step = s.step || 0;
+    const runDefs = [
+      { label: 'Read the job definitions', detail: plural(okKjb.length, '.kjb file') },
+      { label: 'Parse transformations', detail: plural(okKtr.length, '.ktr file') },
+      { label: 'Analyze the functional document', detail: s.doc[0] ? s.doc[0].name : '' },
+      { label: 'Map Pentaho steps to DataStage stages', detail: plural(okKtr.length, 'parallel job') + ' · ' + plural(okKjb.length, 'sequence job') },
+      { label: 'Generate the .dsx export', detail: jobStem + '.dsx' }
+    ];
+    const runSteps = runDefs.map((d, i) => {
+      const done = isComplete || i < step, active = isTranslating && i === step, pending = !done && !active;
+      return Object.assign(d, { done, active, pending, color: pending ? '#6f6f6f' : '#161616', weight: active ? 600 : 400 });
+    });
+    const pct = Math.round((Math.min(step, 5) / 5) * 100);
+
+    const pState = (i) => {
+      const idx = isUpload ? 0 : (isTranslating ? 1 : 2);
+      return { done: i < idx || (isComplete && i === 2), current: i === idx && !(isComplete && i === 2), todo: i > idx };
+    };
+    const progSteps = [
+      { label: 'Upload files', sub: 'Transformations, job and document' },
+      { label: 'Translate', sub: 'Pentaho to DataStage' },
+      { label: 'Download', sub: 'DataStage .dsx export' }
+    ].map((p, i) => {
+      const st = pState(i);
+      return Object.assign(p, st, { line: st.todo ? '#8d8d8d' : '#0f62fe', weight: st.current ? 600 : 400 });
+    });
+
+    const mapRows = okKjb.map((f) => ({ source: f.name, ptype: 'Job', dsName: stemOf(f.name), dsType: 'Sequence job' }))
+      .concat(okKtr.map((f) => ({ source: f.name, ptype: 'Transformation', dsName: f.name.replace(/\.ktr$/i, ''), dsType: 'Parallel job' })));
+
+    return {
+      yes: true,
+      isUpload, isTranslating, isComplete,
+      locked: !isUpload,
+      files, has, zone, pick, drop, over,
+      leave: () => { if (this.cur().drag) this.upd({ drag: null }); },
+      checklist,
+      notReady: !ready,
+      gateMsg: anyBad ? 'Remove the invalid files to continue.' : (ready ? 'All inputs are ready.' : 'Upload all three inputs to start the translation.'),
+      gateColor: anyBad ? '#da1e28' : (ready ? '#198038' : '#525252'),
+      start: () => { if (ready) this.start(); },
+      cancel: () => { this.stop(); this.upd({ phase: 'upload', step: 0 }); },
+      reset: () => { this.stop(); this.upd({ phase: 'upload', ktr: [], kjb: [], doc: [], step: 0, downloaded: false }); },
+      runSteps,
+      runLabel: isTranslating ? runDefs[Math.min(step, 4)].label : '',
+      pct, pctLabel: pct + '%', pctWidth: pct + '%',
+      progSteps,
+      dsxName: jobStem + '.dsx',
+      dsxMeta: plural(okKjb.length, 'sequence job') + ' · ' + plural(okKtr.length, 'parallel job') + ' · DataStage export format',
+      download: () => this.upd({ downloaded: true }),
+      downloadLabel: s.downloaded ? 'Downloaded' : 'Download .dsx',
+      mapRows
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,79 @@
+{
+  "mock": true,
+  "upstream": {
+    "baseUrl": "https://migrations.example.com/v1",
+    "timeoutSec": 60,
+    "verifyTls": true,
+    "healthPath": "",
+    "auth": {
+      "type": "none",
+      "headerName": "X-Api-Key",
+      "token": "",
+      "username": "",
+      "password": ""
+    },
+    "extraHeaders": {}
+  },
+  "endpoints": {
+    "create": {
+      "method": "POST",
+      "path": "/migrations"
+    },
+    "upload": {
+      "method": "POST",
+      "path": "/migrations/{id}/files",
+      "fileField": "file",
+      "kindField": "kind"
+    },
+    "removeFile": {
+      "method": "DELETE",
+      "path": "/migrations/{id}/files/{fileId}"
+    },
+    "start": {
+      "method": "POST",
+      "path": "/migrations/{id}/start"
+    },
+    "cancel": {
+      "method": "POST",
+      "path": "/migrations/{id}/cancel"
+    },
+    "status": {
+      "method": "GET",
+      "path": "/migrations/{id}"
+    },
+    "download": {
+      "method": "GET",
+      "path": "/migrations/{id}/result/download"
+    }
+  },
+  "responseMap": {
+    "id": "id",
+    "fileId": "id",
+    "status": "status",
+    "step": "progress.percent",
+    "stepIsPercent": true,
+    "error": "error.detail",
+    "errorMessage": "detail",
+    "statusValues": {
+      "queued": "queued",
+      "running": "running",
+      "complete": "succeeded",
+      "failed": "failed",
+      "cancelled": "cancelled"
+    },
+    "output": {
+      "path": "result",
+      "fileName": "artifact.fileName",
+      "sequenceJobs": "summary.sequenceJobs",
+      "parallelJobs": "summary.parallelJobs"
+    },
+    "mappings": {
+      "path": "result.items",
+      "source": "source.name",
+      "pentahoType": "source.type",
+      "dsName": "target.name",
+      "dsType": "target.type",
+      "status": "status"
+    }
+  }
+}

@@ -1,0 +1,376 @@
+/* ============================================================================
+   Carbon Design System — Colors & Type foundation
+   IBM Carbon v11, "White" theme (the default light theme).
+   Token names follow Carbon's official theme + type tokens.
+   ============================================================================ */
+
+/* ---- Fonts ---------------------------------------------------------------
+   IBM Plex is the IBM corporate typeface. ALL weights are now self-hosted
+   from /fonts (see @font-face block at the bottom) — no network/Google Fonts
+   dependency, so the brand type renders correctly offline, in exports, and
+   in sandboxed previews. IBM Plex is SIL OFL licensed.                        */
+
+:root {
+  /* ====================================================================
+     1. CORE PALETTE — IBM Color Anatomy (the raw swatches tokens map to)
+     ==================================================================== */
+  /* Gray */
+  --cds-gray-10:  #f4f4f4;
+  --cds-gray-20:  #e0e0e0;
+  --cds-gray-30:  #c6c6c6;
+  --cds-gray-40:  #a8a8a8;
+  --cds-gray-50:  #8d8d8d;
+  --cds-gray-60:  #6f6f6f;
+  --cds-gray-70:  #525252;
+  --cds-gray-80:  #393939;
+  --cds-gray-90:  #262626;
+  --cds-gray-100: #161616;
+
+  /* Blue (interactive / brand) */
+  --cds-blue-10:  #edf5ff;
+  --cds-blue-20:  #d0e2ff;
+  --cds-blue-30:  #a6c8ff;
+  --cds-blue-40:  #78a9ff;
+  --cds-blue-50:  #4589ff;
+  --cds-blue-60:  #0f62fe;  /* IBM brand blue — the heart of Carbon */
+  --cds-blue-70:  #0043ce;
+  --cds-blue-80:  #002d9c;
+  --cds-blue-90:  #001d6c;
+  --cds-blue-100: #001141;
+
+  /* Red (danger / error) */
+  --cds-red-10:   #fff1f1;
+  --cds-red-20:   #ffd7d9;
+  --cds-red-30:   #ffb3b8;
+  --cds-red-40:   #ff8389;
+  --cds-red-50:   #fa4d56;
+  --cds-red-60:   #da1e28;
+  --cds-red-70:   #a2191f;
+  --cds-red-80:   #750e13;
+  --cds-red-90:   #520408;
+  --cds-red-100:  #2d0709;
+
+  /* Green (success) */
+  --cds-green-10: #defbe6;
+  --cds-green-20: #a7f0ba;
+  --cds-green-30: #6fdc8c;
+  --cds-green-40: #42be65;
+  --cds-green-50: #24a148;
+  --cds-green-60: #198038;
+  --cds-green-70: #0e6027;
+  --cds-green-80: #044317;
+  --cds-green-90: #022d0d;
+  --cds-green-100:#071908;
+
+  /* Yellow */
+  --cds-yellow-10:  #fcf4d6;
+  --cds-yellow-20:  #fddc69;
+  --cds-yellow-30:  #f1c21b;
+  --cds-yellow-40:  #d2a106;
+  --cds-yellow-50:  #b28600;
+  --cds-yellow-60:  #8e6a00;
+  --cds-yellow-70:  #684e00;
+  --cds-yellow-80:  #483700;
+  --cds-yellow-90:  #302400;
+  --cds-yellow-100: #1c1500;
+
+  /* Orange */
+  --cds-orange-10:  #fff2e8;
+  --cds-orange-20:  #ffd9be;
+  --cds-orange-30:  #ffb784;
+  --cds-orange-40:  #ff832b;
+  --cds-orange-50:  #eb6200;
+  --cds-orange-60:  #ba4e00;
+  --cds-orange-70:  #8a3800;
+  --cds-orange-80:  #5e2900;
+  --cds-orange-90:  #3e1a00;
+  --cds-orange-100: #231000;
+
+  /* Teal */
+  --cds-teal-10:  #d9fbfb;
+  --cds-teal-20:  #9ef0f0;
+  --cds-teal-30:  #3ddbd9;
+  --cds-teal-40:  #08bdba;
+  --cds-teal-50:  #009d9a;
+  --cds-teal-60:  #007d79;
+  --cds-teal-70:  #005d5d;
+  --cds-teal-80:  #004144;
+  --cds-teal-90:  #022b30;
+  --cds-teal-100: #081a1c;
+
+  /* Cyan */
+  --cds-cyan-10:  #e5f6ff;
+  --cds-cyan-20:  #bae6ff;
+  --cds-cyan-30:  #82cfff;
+  --cds-cyan-40:  #33b1ff;
+  --cds-cyan-50:  #1192e8;
+  --cds-cyan-60:  #0072c3;
+  --cds-cyan-70:  #00539a;
+  --cds-cyan-80:  #003a6d;
+  --cds-cyan-90:  #012749;
+  --cds-cyan-100: #061727;
+
+  /* Purple */
+  --cds-purple-10:  #f6f2ff;
+  --cds-purple-20:  #e8daff;
+  --cds-purple-30:  #d4bbff;
+  --cds-purple-40:  #be95ff;
+  --cds-purple-50:  #a56eff;
+  --cds-purple-60:  #8a3ffc;
+  --cds-purple-70:  #6929c4;
+  --cds-purple-80:  #491d8b;
+  --cds-purple-90:  #31135e;
+  --cds-purple-100: #1c0f30;
+
+  /* Magenta */
+  --cds-magenta-10:  #fff0f7;
+  --cds-magenta-20:  #ffd6e8;
+  --cds-magenta-30:  #ffafd2;
+  --cds-magenta-40:  #ff7eb6;
+  --cds-magenta-50:  #ee5396;
+  --cds-magenta-60:  #d02670;
+  --cds-magenta-70:  #9f1853;
+  --cds-magenta-80:  #740937;
+  --cds-magenta-90:  #510224;
+  --cds-magenta-100: #2a0a18;
+
+  /* Cool gray */
+  --cds-cool-gray-10:  #f2f4f8;
+  --cds-cool-gray-20:  #dde1e6;
+  --cds-cool-gray-30:  #c1c7cd;
+  --cds-cool-gray-40:  #a2a9b0;
+  --cds-cool-gray-50:  #878d96;
+  --cds-cool-gray-60:  #697077;
+  --cds-cool-gray-70:  #4d5358;
+  --cds-cool-gray-80:  #343a3f;
+  --cds-cool-gray-90:  #21272a;
+  --cds-cool-gray-100: #121619;
+
+  /* Warm gray */
+  --cds-warm-gray-10:  #f7f3f2;
+  --cds-warm-gray-20:  #e5e0df;
+  --cds-warm-gray-30:  #cac5c4;
+  --cds-warm-gray-40:  #ada8a8;
+  --cds-warm-gray-50:  #8f8b8b;
+  --cds-warm-gray-60:  #726e6e;
+  --cds-warm-gray-70:  #565151;
+  --cds-warm-gray-80:  #3c3838;
+  --cds-warm-gray-90:  #272525;
+  --cds-warm-gray-100: #171414;
+
+  /* ====================================================================
+     2. THEME TOKENS — White theme (semantic, what you actually build with)
+     ==================================================================== */
+  /* Backgrounds */
+  --cds-background:           #ffffff;
+  --cds-background-inverse:   #393939;
+  --cds-background-brand:     #0f62fe;
+  --cds-background-active:    rgba(141,141,141,0.5);
+  --cds-background-hover:     rgba(141,141,141,0.12);
+  --cds-background-selected:  rgba(141,141,141,0.2);
+
+  /* Layers — Carbon's elevation model (01 sits on background, 02 on 01…) */
+  --cds-layer-01:             #f4f4f4;
+  --cds-layer-02:             #ffffff;
+  --cds-layer-03:             #f4f4f4;
+  --cds-layer-accent-01:      #e0e0e0;
+  --cds-layer-hover-01:       #e8e8e8;
+  --cds-layer-selected-01:    #e0e0e0;
+
+  /* Fields (form input backgrounds) */
+  --cds-field-01:             #f4f4f4;
+  --cds-field-02:             #ffffff;
+  --cds-field-hover-01:       #e8e8e8;
+
+  /* Text */
+  --cds-text-primary:         #161616;
+  --cds-text-secondary:       #525252;
+  --cds-text-placeholder:     #a8a8a8;
+  --cds-text-helper:          #6f6f6f;
+  --cds-text-on-color:        #ffffff;
+  --cds-text-on-color-disabled: #8d8d8d;
+  --cds-text-inverse:         #ffffff;
+  --cds-text-error:           #da1e28;
+  --cds-text-disabled:        rgba(22,22,22,0.25);
+
+  /* Links */
+  --cds-link-primary:         #0f62fe;
+  --cds-link-primary-hover:   #0043ce;
+  --cds-link-secondary:       #0043ce;
+  --cds-link-inverse:         #78a9ff;
+  --cds-link-visited:         #8a3ffc;
+
+  /* Icons */
+  --cds-icon-primary:         #161616;
+  --cds-icon-secondary:       #525252;
+  --cds-icon-on-color:        #ffffff;
+  --cds-icon-disabled:        rgba(22,22,22,0.25);
+
+  /* Borders */
+  --cds-border-subtle-00:     #e0e0e0;
+  --cds-border-subtle-01:     #c6c6c6;
+  --cds-border-strong-01:     #8d8d8d;
+  --cds-border-inverse:       #161616;
+  --cds-border-interactive:   #0f62fe;
+
+  /* Interactive / focus */
+  --cds-interactive:          #0f62fe;
+  --cds-focus:                #0f62fe;
+  --cds-focus-inset:          #ffffff;
+
+  /* Buttons */
+  --cds-button-primary:           #0f62fe;
+  --cds-button-primary-hover:     #0353e9;
+  --cds-button-primary-active:    #002d9c;
+  --cds-button-secondary:         #393939;
+  --cds-button-secondary-hover:   #4c4c4c;
+  --cds-button-secondary-active:  #6f6f6f;
+  --cds-button-tertiary:          #0f62fe;
+  --cds-button-danger-primary:    #da1e28;
+  --cds-button-danger-secondary:  #da1e28;
+  --cds-button-danger-hover:      #ba1b23;
+  --cds-button-danger-active:     #750e13;
+  --cds-button-disabled:          #c6c6c6;
+
+  /* Support (status) */
+  --cds-support-error:        #da1e28;
+  --cds-support-success:      #24a148;
+  --cds-support-warning:      #f1c21b;
+  --cds-support-info:         #4589ff;
+  --cds-support-error-inverse:   #fa4d56;
+  --cds-support-success-inverse: #42be65;
+  --cds-support-caution-minor:#f1c21b;
+
+  /* Tags (subtle backgrounds + text) */
+  --cds-tag-blue-bg:    #d0e2ff;  --cds-tag-blue-text:    #0043ce;
+  --cds-tag-gray-bg:    #e0e0e0;  --cds-tag-gray-text:    #393939;
+  --cds-tag-green-bg:   #a7f0ba;  --cds-tag-green-text:   #0e6027;
+  --cds-tag-red-bg:     #ffd7d9;  --cds-tag-red-text:     #a2191f;
+  --cds-tag-purple-bg:  #e8daff;  --cds-tag-purple-text:  #6929c4;
+  --cds-tag-teal-bg:    #9ef0f0;  --cds-tag-teal-text:    #005d5d;
+
+  /* ====================================================================
+     3. TYPE — IBM Plex families + Carbon type scale
+     ==================================================================== */
+  --cds-font-sans:       'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif;
+  --cds-font-condensed:  'IBM Plex Sans Condensed', 'IBM Plex Sans', sans-serif;
+  --cds-font-serif:      'IBM Plex Serif', Georgia, serif;
+  --cds-font-mono:       'IBM Plex Mono', 'Menlo', 'Courier New', monospace;
+
+  /* Carbon type-scale steps (px). Carbon uses a 16px base, 0.25rem rhythm. */
+  --cds-size-12: 0.75rem;    /* 12 */
+  --cds-size-14: 0.875rem;   /* 14 — default body */
+  --cds-size-16: 1rem;       /* 16 */
+  --cds-size-20: 1.25rem;    /* 20 */
+  --cds-size-28: 1.75rem;    /* 28 */
+  --cds-size-32: 2rem;       /* 32 */
+  --cds-size-42: 2.625rem;   /* 42 */
+  --cds-size-54: 3.375rem;   /* 54 */
+
+  /* Weights */
+  --cds-weight-light:    300;
+  --cds-weight-regular:  400;
+  --cds-weight-medium:   500;  /* Plex "Text" ≈ 450, mapped to Medium here */
+  --cds-weight-semibold: 600;
+  --cds-weight-bold:     700;
+}
+
+/* ============================================================================
+   SEMANTIC TYPE STYLES — Carbon "Productive" + "Expressive" type sets.
+   Apply these classes directly, or copy the declarations into your own rules.
+   ============================================================================ */
+
+/* Body / productive (-01) + expressive (-02). Values verified against the
+   Carbon Type Sets Figma. Sizes in px; line-heights as ratio of px/font-size. */
+.cds-body-01 { font-family: var(--cds-font-sans); font-size: 0.875rem; line-height: 1.42857; font-weight: 400; letter-spacing: 0.16px; }  /* 14 / 20 */
+.cds-body-02 { font-family: var(--cds-font-sans); font-size: 1rem;     line-height: 1.5;       font-weight: 400; letter-spacing: 0; }      /* 16 / 24 */
+.cds-body-compact-01 { font-family: var(--cds-font-sans); font-size: 0.875rem; line-height: 1.28571; font-weight: 400; letter-spacing: 0.16px; } /* 14 / 18 */
+.cds-body-compact-02 { font-family: var(--cds-font-sans); font-size: 1rem;     line-height: 1.375;   font-weight: 400; letter-spacing: 0; }       /* 16 / 22 */
+
+/* Utility — labels, helper, legal (IBM Plex Sans) */
+.cds-label-01   { font-family: var(--cds-font-sans); font-size: 0.75rem;  line-height: 1.33333; font-weight: 400; letter-spacing: 0.32px; } /* 12 / 16 */
+.cds-label-02   { font-family: var(--cds-font-sans); font-size: 0.875rem; line-height: 1.28571; font-weight: 400; letter-spacing: 0.16px; } /* 14 / 18 */
+.cds-helper-01  { font-family: var(--cds-font-sans); font-size: 0.75rem;  line-height: 1.33333; font-weight: 400; letter-spacing: 0.32px; color: var(--cds-text-helper); } /* 12 / 16 */
+.cds-helper-02  { font-family: var(--cds-font-sans); font-size: 0.875rem; line-height: 1.28571; font-weight: 400; letter-spacing: 0.16px; color: var(--cds-text-helper); } /* 14 / 18 */
+.cds-legal-01   { font-family: var(--cds-font-sans); font-size: 0.75rem;  line-height: 1.33333; font-weight: 400; letter-spacing: 0.32px; } /* 12 / 16 */
+.cds-caption-01 { font-family: var(--cds-font-sans); font-size: 0.75rem;  line-height: 1.33333; font-weight: 400; letter-spacing: 0.32px; } /* alias of label-01 */
+
+/* Fixed headings — productive (compact = tighter line-height) */
+.cds-heading-compact-01 { font-family: var(--cds-font-sans); font-size: 0.875rem; line-height: 1.28571; font-weight: 600; letter-spacing: 0.16px; } /* 14 / 18 */
+.cds-heading-compact-02 { font-family: var(--cds-font-sans); font-size: 1rem;     line-height: 1.375;   font-weight: 600; letter-spacing: 0; }       /* 16 / 22 */
+.cds-heading-01 { font-family: var(--cds-font-sans); font-size: 0.875rem; line-height: 1.42857; font-weight: 600; letter-spacing: 0.16px; } /* 14 / 20 */
+.cds-heading-02 { font-family: var(--cds-font-sans); font-size: 1rem;     line-height: 1.5;     font-weight: 600; letter-spacing: 0; }       /* 16 / 24 */
+.cds-heading-03 { font-family: var(--cds-font-sans); font-size: 1.25rem;  line-height: 1.4;     font-weight: 400; }  /* 20 / 28 */
+.cds-heading-04 { font-family: var(--cds-font-sans); font-size: 1.75rem;  line-height: 1.28571; font-weight: 400; }  /* 28 / 36 */
+.cds-heading-05 { font-family: var(--cds-font-sans); font-size: 2rem;     line-height: 1.25;    font-weight: 400; }  /* 32 / 40 */
+.cds-heading-06 { font-family: var(--cds-font-sans); font-size: 2.625rem; line-height: 1.19048; font-weight: 300; }  /* 42 / 50 */
+.cds-heading-07 { font-family: var(--cds-font-sans); font-size: 3.375rem; line-height: 1.18519; font-weight: 300; }  /* 54 / 64 */
+
+/* Expressive fluid display — marketing + hero scale (largest steps) */
+.cds-fluid-heading-05 { font-family: var(--cds-font-sans); font-size: 2.625rem; line-height: 1.19048; font-weight: 300; } /* 42 / 50 */
+.cds-fluid-heading-06 { font-family: var(--cds-font-sans); font-size: 2.625rem; line-height: 1.19048; font-weight: 600; } /* 42 / 50 semibold */
+.cds-display-01 { font-family: var(--cds-font-sans); font-size: 3.375rem; line-height: 1.18519; font-weight: 300; } /* fluid-display-01 · 54 / 64 */
+.cds-display-02 { font-family: var(--cds-font-sans); font-size: 3.375rem; line-height: 1.18519; font-weight: 600; } /* fluid-display-02 · 54 / 64 semibold */
+.cds-display-03 { font-family: var(--cds-font-sans); font-size: 3.75rem;  line-height: 1.16667; font-weight: 300; } /* fluid-display-03 · 60 / 70 */
+.cds-display-04 { font-family: var(--cds-font-sans); font-size: 5.75rem;  line-height: 1.1087;  font-weight: 300; } /* fluid-display-04 · 92 / 102 */
+.cds-fluid-quotation-01 { font-family: var(--cds-font-serif); font-size: 1.5rem; line-height: 1.25; font-weight: 400; } /* 24 / 30 IBM Plex Serif */
+
+/* Code (IBM Plex Mono) */
+.cds-code-01 { font-family: var(--cds-font-mono); font-size: 0.75rem;  line-height: 1.33333; font-weight: 400; letter-spacing: 0.32px; } /* 12 / 16 */
+.cds-code-02 { font-family: var(--cds-font-mono); font-size: 0.875rem; line-height: 1.42857; font-weight: 400; letter-spacing: 0.32px; } /* 14 / 20 */
+
+/* ============================================================================
+   SPACING — Carbon's 8px-based mini-unit spacing scale ($spacing-01 … 13)
+   ============================================================================ */
+:root {
+  --cds-spacing-01: 0.125rem; /* 2  */
+  --cds-spacing-02: 0.25rem;  /* 4  */
+  --cds-spacing-03: 0.5rem;   /* 8  */
+  --cds-spacing-04: 0.75rem;  /* 12 */
+  --cds-spacing-05: 1rem;     /* 16 */
+  --cds-spacing-06: 1.5rem;   /* 24 */
+  --cds-spacing-07: 2rem;     /* 32 */
+  --cds-spacing-08: 2.5rem;   /* 40 */
+  --cds-spacing-09: 3rem;     /* 48 */
+  --cds-spacing-10: 4rem;     /* 64 */
+  --cds-spacing-11: 5rem;     /* 80 */
+  --cds-spacing-12: 6rem;     /* 96 */
+  --cds-spacing-13: 10rem;    /* 160 */
+
+  /* Carbon radius — famously near-zero. 0 by default; tokens for AI/rounded. */
+  --cds-radius-0: 0;
+  --cds-radius-sm: 2px;       /* used in a few v11 components */
+
+  /* Elevation — Carbon shadows are subtle and used sparingly */
+  --cds-shadow-overlay: 0 2px 6px rgba(0,0,0,0.2);
+  --cds-shadow-menu:    0 2px 6px rgba(0,0,0,0.3);
+
+  /* Layout */
+  --cds-container-padding: var(--cds-spacing-05);
+  --cds-grid-gutter: 2rem;    /* 32px gutters; 16-col Carbon grid */
+}
+
+/* ============================================================================
+   SELF-HOSTED FONT FACES — IBM Plex from /fonts. No network dependency.
+   IBM Plex Sans (the brand face) ships every used weight as .woff2:
+   Thin 100 · Light 300 · Regular 400 · SemiBold 600 · Bold 700 · Italic 400.
+   Mono / Condensed / Serif keep their 400 .ttf (heavier weights synthesize).
+   ============================================================================ */
+@font-face { font-family: 'IBM Plex Sans'; font-weight: 100; font-style: normal;
+  src: url('fonts/IBMPlexSans-Thin.woff2') format('woff2'); font-display: swap; }
+@font-face { font-family: 'IBM Plex Sans'; font-weight: 300; font-style: normal;
+  src: url('fonts/IBMPlexSans-Light.woff2') format('woff2'); font-display: swap; }
+@font-face { font-family: 'IBM Plex Sans'; font-weight: 400; font-style: normal;
+  src: url('fonts/IBMPlexSans-Regular.woff2') format('woff2'); font-display: swap; }
+@font-face { font-family: 'IBM Plex Sans'; font-weight: 600; font-style: normal;
+  src: url('fonts/IBMPlexSans-SemiBold.woff2') format('woff2'); font-display: swap; }
+@font-face { font-family: 'IBM Plex Sans'; font-weight: 700; font-style: normal;
+  src: url('fonts/IBMPlexSans-Bold.woff2') format('woff2'); font-display: swap; }
+@font-face { font-family: 'IBM Plex Sans'; font-weight: 400; font-style: italic;
+  src: url('fonts/IBMPlexSans-Italic.woff2') format('woff2'); font-display: swap; }
+@font-face { font-family: 'IBM Plex Mono'; font-weight: 400; font-style: normal;
+  src: url('fonts/IBMPlexMono-Text.ttf') format('truetype'); font-display: swap; }
+@font-face { font-family: 'IBM Plex Sans Condensed'; font-weight: 400; font-style: normal;
+  src: url('fonts/IBMPlexSansCondensed-Text.ttf') format('truetype'); font-display: swap; }
+@font-face { font-family: 'IBM Plex Serif'; font-weight: 400; font-style: normal;
+  src: url('fonts/IBMPlexSerif-Text.ttf') format('truetype'); font-display: swap; }
