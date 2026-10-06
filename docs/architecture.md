@@ -124,4 +124,4 @@ upload  ──[start]──►  translating  ──[complete]──►  complete
   gitignored.
 - Set `ADMIN_TOKEN` before sharing beyond localhost.
 - Production: gunicorn + TLS terminator. Never the Flask dev server.
-- Container base: `registry.redhat.io/ubi9/python-311-minimal`, non-root user.
+- Container base: `registry.access.redhat.com/ubi9/python-3.11-minimal`, non-root user.

@@ -1,4 +1,4 @@
-FROM registry.redhat.io/ubi9/python-311-minimal:latest
+FROM registry.access.redhat.com/ubi9/python-3.11-minimal:latest
 
 # ── Non-root user ────────────────────────────────────────────────────────────
 RUN useradd -m -u 1001 appuser
