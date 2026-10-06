@@ -1,0 +1,71 @@
+name: CI
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+
+jobs:
+  # ── Gateway: lint + unit + contract ──────────────────────────────────────
+  gateway:
+    name: Gateway (Python)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r server/requirements.txt pytest responses schemathesis flake8
+
+      - name: Lint
+        run: flake8 server/ --max-line-length=120 --extend-ignore=E501
+
+      - name: Unit tests
+        run: pytest tests/gateway/ -v
+
+      - name: Contract tests (gateway must be running)
+        run: |
+          python server/app.py &
+          sleep 3
+          pytest tests/contract/ -v
+          kill %1
+
+  # ── Browser E2E ──────────────────────────────────────────────────────────
+  ui:
+    name: UI (Playwright)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install Python dependencies
+        run: pip install -r server/requirements.txt
+
+      - name: Install Node dependencies
+        run: npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Run E2E tests
+        run: npx playwright test
+
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7

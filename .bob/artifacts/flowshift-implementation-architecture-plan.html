@@ -1,0 +1,410 @@
+
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>FlowShift — Architecture Plan</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, "Segoe UI", system-ui, sans-serif; font-size: 14px; line-height: 1.6; color: #1f2328; background: #fff; }
+  .page { max-width: 760px; margin: 0 auto; padding: 40px 24px 60px; }
+  h1 { font-size: 22px; font-weight: 700; color: #1f2328; margin-bottom: 4px; }
+  .subtitle { color: #57606a; font-size: 13px; margin-bottom: 32px; border-bottom: 1px solid #e5e7eb; padding-bottom: 18px; }
+  h2 { font-size: 15px; font-weight: 700; color: #1f2328; margin: 32px 0 10px; border-left: 3px solid #3b82d4; padding-left: 10px; }
+  h3 { font-size: 13px; font-weight: 700; color: #1f2328; margin: 18px 0 6px; }
+  p { margin-bottom: 10px; color: #1f2328; }
+  ul, ol { padding-left: 20px; margin-bottom: 10px; }
+  li { margin-bottom: 4px; }
+  code { font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace; font-size: 12px; background: #f7f8fa; border: 1px solid #e5e7eb; border-radius: 3px; padding: 1px 5px; }
+  pre { background: #f7f8fa; border: 1px solid #e5e7eb; border-radius: 5px; padding: 14px 16px; overflow-x: auto; font-size: 12px; line-height: 1.7; margin-bottom: 12px; font-family: "SFMono-Regular", Consolas, monospace; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; margin-bottom: 14px; }
+  th { background: #f7f8fa; border: 1px solid #e5e7eb; padding: 7px 10px; text-align: left; font-weight: 600; }
+  td { border: 1px solid #e5e7eb; padding: 7px 10px; vertical-align: top; }
+  .pill { display: inline-block; font-size: 11px; font-weight: 600; border-radius: 3px; padding: 2px 7px; margin-right: 4px; white-space: nowrap; }
+  .pill-blue { background: #dbeafe; color: #1e40af; }
+  .pill-green { background: #dcfce7; color: #166534; }
+  .pill-yellow { background: #fef9c3; color: #854d0e; }
+  .pill-red { background: #fee2e2; color: #991b1b; }
+  .pill-purple { background: #ede9fe; color: #5b21b6; }
+  .note { background: #f0f6ff; border-left: 3px solid #3b82d4; padding: 10px 14px; border-radius: 3px; font-size: 13px; color: #1e3a5f; margin-bottom: 14px; }
+  .warn { background: #fffbeb; border-left: 3px solid #f59e0b; padding: 10px 14px; border-radius: 3px; font-size: 13px; color: #78350f; margin-bottom: 14px; }
+  .layer { background: #f7f8fa; border: 1px solid #e5e7eb; border-radius: 6px; padding: 14px 16px; margin-bottom: 10px; }
+  .layer-title { font-weight: 700; font-size: 13px; color: #3b82d4; margin-bottom: 5px; }
+  .arrow { color: #57606a; font-size: 20px; text-align: center; padding: 2px 0; }
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 10px; }
+  .col-card { background: #f7f8fa; border: 1px solid #e5e7eb; border-radius: 5px; padding: 12px 14px; }
+  .col-card h4 { font-size: 12px; font-weight: 700; color: #3b82d4; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.04em; }
+  .divider { border: none; border-top: 1px solid #e5e7eb; margin: 30px 0; }
+  .step-list { counter-reset: steps; list-style: none; padding: 0; }
+  .step-list li { counter-increment: steps; padding-left: 30px; position: relative; margin-bottom: 8px; }
+  .step-list li::before { content: counter(steps); position: absolute; left: 0; top: 1px; width: 20px; height: 20px; background: #3b82d4; color: #fff; border-radius: 50%; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; line-height: 1; }
+  .inline-badge { display: inline-block; font-size: 10px; font-weight: 700; background: #e5e7eb; color: #57606a; border-radius: 3px; padding: 1px 5px; vertical-align: middle; margin-left: 4px; }
+  footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid #e5e7eb; text-align: center; font-size: 12px; color: #57606a; }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <h1>FlowShift — Implementation Architecture Plan</h1>
+  <p class="subtitle">Pentaho → IBM DataStage migration framework · AI-powered, open-source, GitHub-driven</p>
+
+  
+  <h2>1. What already exists and what it tells us</h2>
+  <p>The repository already contains all three layers in working, well-factored form:</p>
+  <ul>
+    <li><strong><code>migration-app/</code></strong> — plain ES-module UI, no build step, IBM Carbon CSS, delegated event model, full mock in-browser for offline dev.</li>
+    <li><strong><code>server/app.py</code></strong> — Flask gateway with configurable upstream mapping, mock mode, admin-guarded settings routes, secret masking, deep-merge config. The gateway shields the browser from every upstream detail.</li>
+    <li><strong><code>server/openapi.yaml</code></strong> — clean OpenAPI 3.1 contract defining the migration lifecycle and all response shapes, ready for a real backend team to implement.</li>
+  </ul>
+  <p>What is <em>not yet present</em>: tests, CI, the actual AI translation engine, and the GitHub workflow infrastructure needed to evolve the project safely. This plan covers all of that.</p>
+
+  
+  <h2>2. Runtime architecture</h2>
+
+  <div class="layer">
+    <div class="layer-title">Browser — <code>migration-app/</code></div>
+    Plain JS modules + IBM Carbon CSS. No framework, no build step. Calls only <code>/api/…</code> and <code>/admin/…</code> on the same origin.
+  </div>
+  <div class="arrow">▼</div>
+  <div class="layer">
+    <div class="layer-title">Flask Gateway — <code>server/app.py</code></div>
+    Stable route contract for the UI. Holds secrets. Forwards calls to the upstream API using configurable paths, method, auth and response-field mapping stored in <code>config.json</code>. Also serves the static UI from <code>migration-app/</code>.
+  </div>
+  <div class="arrow">▼</div>
+  <div class="layer">
+    <div class="layer-title">Migration API — <code>server/openapi.yaml</code> (backend team implements)</div>
+    Async translation engine: parses .ktr / .kjb XML, reads the functional document via an LLM, maps Pentaho steps to DataStage stages, and emits a .dsx export. Lifecycle: <code>draft → queued → running → succeeded | failed | cancelled</code>.
+  </div>
+
+  
+  <h2>3. Recommended source tree</h2>
+  <pre>flowshift/
+├── migration-app/          # Browser UI (no build)
+│   ├── index.html
+│   ├── app.js              # single-state render loop, event delegation
+│   ├── api.js              # ONLY file that calls /api/*
+│   ├── settings.js         # Gateway settings dialog (calls /admin/*)
+│   ├── mock-api.js         # In-browser stand-in, same shape as api.js
+│   ├── config.js           # BASE_URL, POLL_INTERVAL_MS
+│   └── styles.css
+│
+├── server/                 # Flask gateway
+│   ├── app.py              # Routes, upstream proxy, mock, admin
+│   ├── config.default.json # Shipped defaults (no secrets)
+│   ├── config.json         # Runtime config (gitignored)
+│   ├── openapi.yaml        # Upstream API contract
+│   └── requirements.txt
+│
+├── tests/
+│   ├── gateway/            # pytest — unit + integration for server/
+│   │   ├── test_config.py
+│   │   ├── test_mock.py
+│   │   └── test_normalize_status.py
+│   ├── ui/                 # Playwright E2E — browser against mock gateway
+│   │   ├── upload.spec.ts
+│   │   ├── lifecycle.spec.ts
+│   │   └── settings.spec.ts
+│   └── contract/           # Schemathesis — OpenAPI contract fuzz
+│       └── test_openapi.py
+│
+├── .github/
+│   ├── workflows/
+│   │   ├── ci.yml          # Lint + tests on every push / PR
+│   │   └── release.yml     # Tag-triggered: build image, publish OCI
+│   └── ISSUE_TEMPLATE/
+│       ├── bug.yml
+│       ├── feature.yml
+│       └── adapter.yml     # New platform adapter request
+│
+├── docs/
+│   ├── architecture.md     # This plan, kept as living document
+│   ├── extending.md        # How to add a new source/target platform
+│   └── api-contract.md     # Backend team guide (mirrors openapi.yaml)
+│
+├── .gitignore              # Includes server/config.json, *.pyc, node_modules
+├── LICENSE
+└── README.md</pre>
+  <div class="note">
+    <strong>Key invariant:</strong> <code>migration-app/api.js</code> and <code>server/app.py</code> are the <em>only</em> two files with seams to the outside world. Every new platform adapter, new auth scheme, or new response shape should be expressible through config and a mapping change in those two files, not a new dependency.
+  </div>
+
+  
+  <h2>4. UI component model</h2>
+  <p>The UI deliberately uses no framework. The existing pattern — a single <code>state</code> object, a <code>render()</code> function that rewrites DOM sections, and a single delegated event listener — is the right model. Keep it.</p>
+
+  <table>
+    <tr><th>Module / function</th><th>Responsibility</th><th>Extension points</th></tr>
+    <tr><td><code>app.js · render()</code></td><td>Full re-render from state. Calls <code>view*()</code> helpers.</td><td>Add a new phase by adding a <code>view*()</code> function and a branch in <code>render()</code>.</td></tr>
+    <tr><td><code>app.js · state</code></td><td>Single source of truth: phase, files, migrationId, result, settings, flags.</td><td>Add new top-level keys; never mutate nested objects — always replace them.</td></tr>
+    <tr><td><code>api.js · real</code></td><td>All HTTP calls. Maps to the gateway's stable <code>/api/*</code> contract.</td><td>To add an endpoint, add a method here and a corresponding route in <code>app.py</code>.</td></tr>
+    <tr><td><code>mock-api.js</code></td><td>In-browser simulation, same function signatures as <code>api.js</code>.</td><td>Mirror every new <code>api.js</code> method here so offline development stays complete.</td></tr>
+    <tr><td><code>settings.js</code></td><td>Admin dialog for gateway config. Reads/writes <code>/admin/config</code>.</td><td>Add a new config section by adding a <code>&lt;fieldset&gt;</code> to <code>form()</code> and a matching field in <code>collect()</code>.</td></tr>
+    <tr><td><code>config.js</code></td><td>Gateway URL, poll interval, auth header hook.</td><td>Swap <code>getAuthHeaders</code> to inject a per-request token (e.g. from sessionStorage).</td></tr>
+  </table>
+
+  <h3>Phase state machine</h3>
+  <pre>upload  ──[start]──►  translating  ──[complete]──►  complete
+  ▲                        │
+  └──[cancel / failed]────┘        reset ──► upload (new migrationId)</pre>
+  <p>Only three UI phases; each maps to exactly one <code>view*()</code> function. The <code>phase</code> key in state drives the entire render — no conditional CSS classes scattered across the DOM.</p>
+
+  
+  <h2>5. Data service abstraction</h2>
+
+  <div class="two-col">
+    <div class="col-card">
+      <h4>Browser side (<code>api.js</code>)</h4>
+      <ul>
+        <li>One <code>http(path, opts)</code> helper — throws a typed error with <code>status</code> and <code>code</code>.</li>
+        <li>Seven named functions: <code>createMigration</code>, <code>uploadFile</code>, <code>removeFile</code>, <code>start</code>, <code>cancel</code>, <code>getStatus</code>, <code>download</code>.</li>
+        <li>Exports either <code>real</code> or <code>mock</code> depending on <code>config.USE_MOCK</code>.</li>
+        <li>No global state, no caching — callers own retry / backoff logic.</li>
+      </ul>
+    </div>
+    <div class="col-card">
+      <h4>Gateway side (<code>app.py</code>)</h4>
+      <ul>
+        <li><code>upstream(method, path, …)</code> — single function that builds auth headers, makes the request, handles TLS.</li>
+        <li><code>dig(obj, path)</code> — dotted-path reader for response mapping.</li>
+        <li><code>normalize_status(body, rm)</code> — maps any upstream shape to the UI's <code>MigrationStatus</code>.</li>
+        <li><code>fail_from(r, cfg)</code> — turns upstream errors into <code>{code, message}</code> the UI understands.</li>
+      </ul>
+    </div>
+  </div>
+  <p>When connecting a new upstream API, only <code>config.json</code> needs to change — not code. The <code>responseMap</code> section handles field renaming; the <code>statusValues</code> map handles status-word differences; <code>stepIsPercent</code> handles progress-unit differences.</p>
+
+  
+  <h2>6. State management strategy</h2>
+  <p>The existing approach is correct and should not be replaced with a framework. The rules to enforce:</p>
+  <ol>
+    <li><strong>One state object</strong>, never duplicated into DOM attributes or module-level variables.</li>
+    <li><strong>State transitions are synchronous</strong> — async operations update state after <code>await</code>, then call <code>render()</code>.</li>
+    <li><strong>No intermediate renders during an async sequence</strong> — set all state changes, then call <code>render()</code> once.</li>
+    <li><strong>Guards prevent double-submission</strong>: <code>state.starting</code> and <code>state.downloading</code> flags disable buttons during in-flight calls. Mirror this pattern for every new async action.</li>
+    <li><strong>Polling is owned by the state machine</strong>: <code>poll()</code> starts, <code>stopPoll()</code> stops. Never start a second poll without stopping the first.</li>
+    <li><strong>Server-side config is not in client state</strong>: gateway settings live in <code>server/config.json</code> and are loaded on demand by <code>settings.js</code> via <code>/admin/config</code>.</li>
+  </ol>
+
+  
+  <h2>7. Error handling</h2>
+  <table>
+    <tr><th>Layer</th><th>Error type</th><th>Handling</th></tr>
+    <tr>
+      <td>Browser — file validation</td>
+      <td>Wrong extension, empty file</td>
+      <td>Synchronous, before upload. Sets <code>item.state = 'bad'</code>, shows inline error under the file row. No toast — the error stays visible.</td>
+    </tr>
+    <tr>
+      <td>Browser — upload rejection</td>
+      <td>4xx from gateway (invalid file type, file too large)</td>
+      <td>Sets <code>item.state = 'bad'</code> with the <code>detail</code> text from the upstream problem response. The user can fix and re-upload without losing other files.</td>
+    </tr>
+    <tr>
+      <td>Browser — transient network</td>
+      <td>fetch throws, or 5xx from gateway</td>
+      <td>Toast notification, 6 s auto-dismiss. Polling errors are swallowed silently to avoid spamming the user during brief outages.</td>
+    </tr>
+    <tr>
+      <td>Browser — translation failure</td>
+      <td><code>status === 'failed'</code> from status poll</td>
+      <td>Returns phase to <code>upload</code>. Shows the <code>error.detail</code> text in a toast (the OpenAPI contract guarantees this is safe to show verbatim to users).</td>
+    </tr>
+    <tr>
+      <td>Gateway — upstream unreachable</td>
+      <td><code>requests.RequestException</code></td>
+      <td>Returns <code>{code: "UPSTREAM_UNREACHABLE", message: "Could not reach…"}</code> as HTTP 502.</td>
+    </tr>
+    <tr>
+      <td>Gateway — upstream error</td>
+      <td>4xx/5xx from upstream</td>
+      <td><code>fail_from()</code> extracts the problem detail using the <code>responseMap.errorMessage</code> path, passes status through for 4xx, returns 502 for 5xx.</td>
+    </tr>
+    <tr>
+      <td>Gateway — config invalid</td>
+      <td>Bad base URL, unknown auth type, etc.</td>
+      <td><code>validate(cfg)</code> returns a list of errors before saving. Settings dialog shows them inline.</td>
+    </tr>
+    <tr>
+      <td>Gateway — admin unauthorized</td>
+      <td>Missing or wrong <code>X-Admin-Token</code></td>
+      <td>Returns 401. UI prompts for the token (stored in <code>sessionStorage</code>, not <code>localStorage</code>) and retries automatically.</td>
+    </tr>
+  </table>
+  <div class="warn">
+    <strong>Never expose stack traces or internal paths to the browser.</strong> The gateway's error helpers already follow this rule — keep it. Log verbosely server-side; send only <code>message</code> and <code>code</code> client-side.
+  </div>
+
+  
+  <h2>8. Test strategy</h2>
+
+  <h3>Gateway unit tests — <code>tests/gateway/</code> (pytest)</h3>
+  <ul>
+    <li><strong><code>test_config.py</code></strong>: <code>deep_merge</code>, <code>validate</code>, <code>masked</code>, save/load round-trip. No network.</li>
+    <li><strong><code>test_normalize_status.py</code></strong>: All combinations of upstream shapes against <code>normalize_status()</code> — this is the highest-risk function and deserves the most cases.</li>
+    <li><strong><code>test_mock.py</code></strong>: Full happy path through mock mode using Flask's test client. No <code>requests</code> or real HTTP involved.</li>
+  </ul>
+  <pre># example — normalize_status round-trip
+def test_succeeded_maps_output():
+    rm = json.loads(DEFAULT_PATH.read_text())["responseMap"]
+    body = {"status": "succeeded", "progress": {"percent": 100},
+            "result": {"artifact": {"fileName": "x.dsx"}, "summary": {...}, "items": [...]}}
+    out = normalize_status(body, rm)
+    assert out["status"] == "complete"
+    assert out["output"]["fileName"] == "x.dsx"</pre>
+
+  <h3>Gateway integration test — <code>tests/gateway/test_proxy.py</code> (pytest + responses)</h3>
+  <p>Use the <code>responses</code> library to intercept <code>requests</code> calls. Test that auth headers, path templates, and config-driven field extraction work end-to-end without real network.</p>
+
+  <h3>Contract fuzz — <code>tests/contract/test_openapi.py</code> (Schemathesis)</h3>
+  <pre>import schemathesis
+schema = schemathesis.from_path("server/openapi.yaml", base_url="http://127.0.0.1:5000/api")
+@schema.parametrize()
+def test_api(case): case.call_and_validate()</pre>
+  <p>Runs against the gateway in mock mode. Catches shape regressions between <code>openapi.yaml</code> and <code>normalize_status()</code> automatically.</p>
+
+  <h3>E2E browser tests — <code>tests/ui/</code> (Playwright)</h3>
+  <table>
+    <tr><th>Spec</th><th>What it covers</th></tr>
+    <tr><td><code>upload.spec.ts</code></td><td>Good file accepted, wrong extension rejected inline, empty file rejected, drag-and-drop, remove file.</td></tr>
+    <tr><td><code>lifecycle.spec.ts</code></td><td>Happy path: upload → start → progress updates → complete → download link appears. Cancel mid-run. Failed translation shows toast.</td></tr>
+    <tr><td><code>settings.spec.ts</code></td><td>Open dialog, change base URL, save, test connection. Masked secrets not sent back in clear text. Admin token prompt.</td></tr>
+  </table>
+  <p>Playwright starts the Flask server in mock mode before the test suite and tears it down after. No real upstream needed.</p>
+
+  
+  <h2>9. Local validation steps</h2>
+  <ol class="step-list">
+    <li>
+      <strong>Start the gateway in mock mode</strong><br />
+      <code>cd server &amp;&amp; pip install -r requirements.txt &amp;&amp; python app.py</code><br />
+      Open <a href="http://127.0.0.1:5000">http://127.0.0.1:5000</a>. Upload any .ktr, .kjb, and .pdf. Hit <em>Start translation</em>. Verify progress steps advance, result table appears, download triggers.
+    </li>
+    <li>
+      <strong>Run gateway unit tests</strong><br />
+      <code>pip install pytest responses schemathesis &amp;&amp; pytest tests/gateway/ -v</code>
+    </li>
+    <li>
+      <strong>Run contract tests</strong><br />
+      Start the server in one terminal, then: <code>pytest tests/contract/ -v</code><br />
+      Schemathesis generates ~200 cases covering all endpoints and status codes defined in <code>openapi.yaml</code>.
+    </li>
+    <li>
+      <strong>Run E2E tests</strong><br />
+      <code>npx playwright install --with-deps chromium &amp;&amp; npx playwright test</code><br />
+      The Playwright config starts Flask automatically via a <code>globalSetup</code> fixture.
+    </li>
+    <li>
+      <strong>Connect to a real upstream</strong><br />
+      Open Gateway Settings (gear icon), disable Mock mode, enter your base URL and auth. Hit <em>Save and test connection</em>. If the health check returns HTTP 2xx, the gateway is wired. Run the full upload → translate → download flow.
+    </li>
+    <li>
+      <strong>Lint</strong><br />
+      <code>flake8 server/ --max-line-length=120</code> (Python)<br />
+      For the JS, since there's no build, <code>npx eslint migration-app/ --ext .js</code> with a minimal flat config catches typos without requiring a bundler.
+    </li>
+  </ol>
+
+  
+  <h2>10. CI pipeline — <code>.github/workflows/ci.yml</code></h2>
+  <pre>on: [push, pull_request]
+jobs:
+  gateway:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: pip install -r server/requirements.txt pytest responses schemathesis flake8
+      - run: flake8 server/ --max-line-length=120
+      - run: pytest tests/gateway/ tests/contract/ -v
+  ui:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: "20" }
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: pip install -r server/requirements.txt
+      - run: npx playwright install --with-deps chromium
+      - run: npx playwright test</pre>
+  <p>Both jobs are required checks for merge. The <code>release.yml</code> workflow fires on version tags, builds an OCI image using the Red Hat UBI minimal base (<code>registry.redhat.io/ubi9/python-311-minimal</code>), and publishes to GHCR.</p>
+
+  
+  <h2>11. GitHub-driven feature evolution</h2>
+
+  <h3>Issue templates</h3>
+  <table>
+    <tr><th>Template</th><th>Purpose</th><th>Required fields</th></tr>
+    <tr><td><code>bug.yml</code></td><td>Gateway or UI defect</td><td>Steps to reproduce, expected vs actual, mock vs real API</td></tr>
+    <tr><td><code>feature.yml</code></td><td>New capability</td><td>User story, acceptance criteria, which layer(s) affected</td></tr>
+    <tr><td><code>adapter.yml</code></td><td>New source/target platform (e.g. Informatica → DataStage)</td><td>Source platform + version, target platform, sample file(s) to share</td></tr>
+  </table>
+
+  <h3>Branch and PR conventions</h3>
+  <ul>
+    <li>Branch names: <code>feat/&lt;issue-number&gt;-short-slug</code>, <code>fix/&lt;issue-number&gt;-short-slug</code>.</li>
+    <li>Every PR must reference an issue: <em>Closes #42</em> or <em>Relates to #42</em>.</li>
+    <li>PR description template includes: <em>What changed</em>, <em>How to test locally</em>, <em>Config changes</em> (any new <code>config.default.json</code> keys), <em>OpenAPI changes</em> (yes/no — triggers backend team review).</li>
+    <li>Required reviewers: one for UI-only PRs, two for gateway/contract/OpenAPI PRs.</li>
+  </ul>
+
+  <h3>Labelling for triage</h3>
+  <div>
+    <span class="pill pill-blue">layer:ui</span>
+    <span class="pill pill-green">layer:gateway</span>
+    <span class="pill pill-purple">layer:contract</span>
+    <span class="pill pill-yellow">layer:backend</span>
+    <span class="pill pill-red">breaking-change</span>
+    <span class="pill" style="background:#f0fdf4;color:#166534">adapter-request</span>
+    <span class="pill" style="background:#f7f8fa;color:#57606a">good-first-issue</span>
+  </div>
+  <br />
+  <p>The <span class="pill pill-red">breaking-change</span> label auto-requests a review from a maintainer and blocks merge until the <code>docs/api-contract.md</code> update is included in the same PR.</p>
+
+  <h3>Adding a new source/target adapter (the main extension path)</h3>
+  <ol class="step-list">
+    <li>Open an <code>adapter.yml</code> issue. Attach sample input files.</li>
+    <li>Add the new file extensions to the <code>KINDS</code> map in <code>app.js</code> (or introduce a new kind key).</li>
+    <li>Add the new gateway route(s) to <code>app.py</code> if the upstream API shape differs.</li>
+    <li>Add the new endpoint and response-map fields to <code>config.default.json</code> and the Settings dialog.</li>
+    <li>Extend <code>openapi.yaml</code> with the new schema types and paths. Label the PR <span class="pill pill-red">breaking-change</span> if existing fields change.</li>
+    <li>Add a mock branch in <code>mock_api()</code> (gateway) and a new case in <code>mock-api.js</code> (browser).</li>
+    <li>Add E2E spec covering the new upload → translate → download path.</li>
+  </ol>
+
+  
+  <h2>12. Security baseline (non-negotiable)</h2>
+  <ul>
+    <li>Gateway binds to <code>127.0.0.1</code> by default. Set <code>HOST</code> env var only when behind an authenticating proxy.</li>
+    <li>Secrets (<code>token</code>, <code>password</code>) are masked before sending to the browser. <code>server/config.json</code> is in <code>.gitignore</code>.</li>
+    <li>Set <code>ADMIN_TOKEN</code> before sharing beyond localhost. The <code>/admin/*</code> routes can reconfigure which server the gateway calls.</li>
+    <li>Production: run behind gunicorn + TLS terminator (nginx or a cloud load-balancer). Never use the Flask dev server in production.</li>
+    <li>Container base image: <code>registry.redhat.io/ubi9/python-311-minimal</code>, non-root user, read-only filesystem.</li>
+    <li>Dependency scanning: Mend or <code>pip-audit</code> added to <code>ci.yml</code> as a separate job on every PR.</li>
+    <li>No credentials in logs. The <code>upstream()</code> function never logs request objects. Keep it that way.</li>
+  </ul>
+
+  
+  <h2>13. Recommended build order</h2>
+  <table>
+    <tr><th>#</th><th>Work item</th><th>Layer</th><th>Unlocks</th></tr>
+    <tr><td>1</td><td>Add <code>tests/gateway/</code> suite: config, normalize_status, mock happy-path</td><td>Gateway</td><td>Safe refactoring, CI green baseline</td></tr>
+    <tr><td>2</td><td>Add <code>.github/workflows/ci.yml</code> (Python lint + pytest)</td><td>CI</td><td>PR quality gate from day one</td></tr>
+    <tr><td>3</td><td>Add Schemathesis contract test against mock gateway</td><td>Contract</td><td>Catches OpenAPI/gateway drift automatically</td></tr>
+    <tr><td>4</td><td>Add Playwright E2E: upload, lifecycle, settings</td><td>UI</td><td>Regression safety for UI changes</td></tr>
+    <tr><td>5</td><td>Add issue templates and PR template to <code>.github/</code></td><td>Process</td><td>Structured GitHub-driven evolution</td></tr>
+    <tr><td>6</td><td>Add <code>docs/extending.md</code> with the adapter guide from §11</td><td>Docs</td><td>External contributors can add adapters independently</td></tr>
+    <tr><td>7</td><td>Backend team implements <code>openapi.yaml</code>; test with real API via Settings dialog</td><td>Backend</td><td>End-to-end real migration</td></tr>
+    <tr><td>8</td><td>OCI image + <code>release.yml</code> workflow</td><td>CI/CD</td><td>Distributable artifact, team deployment</td></tr>
+  </table>
+
+  <hr class="divider" />
+  <div class="note">
+    The architecture's central invariant is the <strong>configuration firewall</strong>: the browser only sees stable <code>/api/*</code> routes; the gateway translates them to whatever the upstream requires, with no code changes. Every future adapter, auth scheme, and API evolution should be expressible entirely through <code>config.json</code> edits and the Settings dialog. When a change genuinely requires code, it belongs in exactly one of the two seam files — <code>api.js</code> or <code>app.py</code> — and must be accompanied by a test.
+  </div>
+
+  <footer>Made with IBM Bob</footer>
+</div>
+</body>
+</html>

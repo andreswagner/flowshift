@@ -1,8 +1,14 @@
-# Pentaho to DataStage migration workspace
+# FlowShift — Pentaho to DataStage migration
 
-A web UI for migrating Pentaho flows to IBM DataStage. A user uploads Pentaho transformations (`.ktr`), jobs (`.kjb`) and a functional document. The backend translates them into a single DataStage `.dsx` export, and the user downloads it.
+A web UI for migrating Pentaho flows to IBM DataStage.  A user uploads
+Pentaho transformations (`.ktr`), jobs (`.kjb`) and a functional document.
+The backend translates them into a single DataStage `.dsx` export, and the
+user downloads it.
 
-The browser never talks to the backend directly. It talks to a small **Flask gateway**, which forwards calls to your migration API. The upstream URL, authentication, endpoint paths and response field names are all configurable from the UI, with no code changes.
+The browser never talks to the backend directly.  It talks to a small
+**Flask gateway**, which forwards calls to your migration API.  The upstream
+URL, authentication, endpoint paths and response field names are all
+configurable from the UI, with no code changes.
 
 ```
 Browser (migration-app/)  ──►  Flask gateway (server/app.py)  ──►  Migration API (server/openapi.yaml)
@@ -20,17 +26,22 @@ pip install -r requirements.txt
 python app.py
 ```
 
-Open <http://127.0.0.1:5000>. The gateway starts in **mock mode**, which simulates the backend, so the whole flow works before any real API exists.
+Open <http://127.0.0.1:5000>.  The gateway starts in **mock mode**, which
+simulates the backend, so the whole flow works before any real API exists.
 
 ## Connect to the real API
 
 1. Open **Gateway settings** (gear icon in the header).
 2. Turn off **Mock mode**.
 3. Set the **Base URL** and **Authentication** (none, bearer token, API key header or basic).
-4. Check the **Endpoints** and **Response mapping** sections. The defaults already match [`server/openapi.yaml`](server/openapi.yaml), so a backend that implements that contract needs no changes.
+4. Check the **Endpoints** and **Response mapping** sections.  The defaults already match
+   [`server/openapi.yaml`](server/openapi.yaml), so a backend that implements that contract
+   needs no changes.
 5. Choose **Save and test connection**.
 
-Settings are saved to `server/config.json`. Defaults live in `server/config.default.json`. Tokens and passwords stay on the server and are never sent back to the browser.
+Settings are saved to `server/config.json`.  Defaults live in
+`server/config.default.json`.  Tokens and passwords stay on the server and
+are never sent back to the browser.
 
 ### Matching an existing API
 
@@ -43,30 +54,77 @@ If your API already exists and differs from the contract, adjust it in the dialo
 
 ## Project layout
 
-| Path | Purpose |
-|---|---|
-| `migration-app/` | The UI: plain JavaScript modules and CSS, no build step. Styled with IBM Carbon. |
-| `migration-app/api.js` | The only file in the UI that calls the backend (via the gateway). |
-| `migration-app/settings.js` | The Gateway settings dialog. |
-| `migration-app/config.js` | Gateway URL and polling interval for the UI. |
-| `server/app.py` | The Flask gateway: public `/api/...` routes, `/admin/...` settings routes, mock mode. |
-| `server/openapi.yaml` | The upstream API contract (OpenAPI 3.1) for the backend team. |
-| `server/config.default.json` | Default gateway settings. |
-| `canvas/` | The original design mockup, kept for reference. |
+```
+flowshift/
+├── migration-app/          # Browser UI — no build step, IBM Carbon CSS
+│   ├── index.html
+│   ├── app.js              # State machine + render loop
+│   ├── api.js              # All fetch() calls (the only network seam)
+│   ├── settings.js         # Gateway settings dialog
+│   ├── mock-api.js         # In-browser stand-in for api.js
+│   ├── config.js           # BASE_URL, POLL_INTERVAL_MS
+│   ├── styles.css
+│   └── ds/
+│       └── colors_and_type.css
+│
+├── server/                 # Flask gateway
+│   ├── app.py              # Routes, proxy, mock mode, admin
+│   ├── config.default.json # Shipped defaults (no secrets)
+│   ├── config.json         # Runtime config  ← gitignored
+│   ├── openapi.yaml        # Upstream API contract (OpenAPI 3.1)
+│   └── requirements.txt
+│
+├── tests/
+│   ├── gateway/            # pytest — config helpers + mock integration
+│   │   ├── test_config.py
+│   │   └── test_mock.py
+│   ├── contract/           # Schemathesis — OpenAPI fuzz against mock gateway
+│   │   └── test_openapi.py
+│   └── ui/                 # Playwright E2E — full browser tests
+│       ├── upload.spec.ts
+│       ├── lifecycle.spec.ts
+│       ├── settings.spec.ts
+│       ├── global-setup.ts
+│       └── fixtures/
+│
+├── .github/
+│   ├── workflows/
+│   │   ├── ci.yml          # Lint + tests on every push / PR
+│   │   └── release.yml     # Tag-triggered OCI image build
+│   ├── ISSUE_TEMPLATE/
+│   │   ├── bug.yml
+│   │   ├── feature.yml
+│   │   └── adapter.yml     # New platform adapter request
+│   └── PULL_REQUEST_TEMPLATE.md
+│
+├── docs/
+│   ├── architecture.md     # Layer diagram, source tree, invariants
+│   ├── extending.md        # How to add a new platform adapter
+│   └── api-contract.md     # Backend team reference for openapi.yaml
+│
+├── playwright.config.ts
+├── package.json
+├── tsconfig.json
+└── README.md               # This file
+```
 
 ## How a migration runs
 
-1. The user adds files. Each is uploaded straight away and validated (extension, not empty), so errors show per file.
+1. The user adds files.  Each is uploaded straight away and validated
+   (extension, not empty), so errors show per file.
 2. **Start translation** is enabled once all three inputs are valid.
-3. The UI starts the migration and polls its status. Progress and steps update as the backend works.
-4. When the status is `succeeded`, the UI shows the results table and a **Download .dsx** button.
-5. **Cancel** stops the work and returns the migration to `draft`, so the user can start it again.
+3. The UI starts the migration and polls its status.  Progress and steps
+   update as the backend works.
+4. When the status is `succeeded`, the UI shows the results table and a
+   **Download .dsx** button.
+5. **Cancel** stops the work and returns the migration to `draft`, so the
+   user can start it again.
 
-Lifecycle: `draft` → `queued` → `running` → `succeeded` | `failed` | `cancelled`.
+Lifecycle: `draft` → `queued` → `running` → `succeeded` | `failed` | `cancelled`
 
 ## Gateway routes
 
-The UI calls these. They are stable even when the upstream API changes.
+The UI calls these.  They are stable even when the upstream API changes.
 
 | Route | Purpose |
 |---|---|
@@ -79,32 +137,70 @@ The UI calls these. They are stable even when the upstream API changes.
 | `GET /api/migrations/{id}/download` | Stream the `.dsx` file |
 | `GET`/`PUT /admin/config`, `POST /admin/test` | Read, save and test the gateway settings |
 
+## Running tests
+
+### Gateway unit + integration tests
+
+```bash
+pip install pytest flask requests
+pytest tests/gateway/ -v
+```
+
+### OpenAPI contract tests
+
+Start the gateway first, then:
+
+```bash
+pip install schemathesis
+pytest tests/contract/ -v
+```
+
+### Browser E2E tests (Playwright)
+
+```bash
+npm install
+npx playwright install --with-deps chromium
+npx playwright test
+```
+
+The Playwright config starts the Flask gateway automatically before the
+suite and tears it down after.
+
 ## Configuration
 
 Environment variables for `server/app.py`:
 
 | Variable | Default | Meaning |
 |---|---|---|
-| `HOST` | `127.0.0.1` | Interface to bind. Keep the default unless the server is behind authentication. |
+| `HOST` | `127.0.0.1` | Interface to bind.  Keep the default unless the server is behind authentication. |
 | `PORT` | `5000` | Port. |
 | `CONFIG_PATH` | `server/config.json` | Where settings are stored. |
-| `ADMIN_TOKEN` | unset | If set, `/admin/*` requires the header `X-Admin-Token`. The UI asks for it when needed. |
+| `ADMIN_TOKEN` | unset | If set, `/admin/*` requires the header `X-Admin-Token`.  The UI asks for it when needed. |
 
 ## Security notes
 
-- `/admin/*` can change which server the gateway calls and which credentials it sends. Do not expose it to untrusted users. Set `ADMIN_TOKEN` and put the app behind your normal login before sharing it beyond your machine.
-- `server/config.json` contains secrets in plain text. Keep it out of version control and restrict file permissions.
-- The Flask built-in server is for development. For production, run behind a WSGI server such as gunicorn and terminate TLS in front of it.
+- `/admin/*` can change which server the gateway calls and which credentials
+  it sends.  Do not expose it to untrusted users.  Set `ADMIN_TOKEN` and put
+  the app behind your normal login before sharing it beyond your machine.
+- `server/config.json` contains secrets in plain text.  Keep it out of
+  version control (it is gitignored) and restrict file permissions.
+- The Flask built-in server is for development.  For production, run behind
+  a WSGI server such as gunicorn and terminate TLS in front of it.
 
 ## For the backend team
 
-Implement [`server/openapi.yaml`](server/openapi.yaml). You can render it with any OpenAPI 3.1 viewer, such as Swagger UI or Redoc. Points that matter most:
+See [`docs/api-contract.md`](docs/api-contract.md) for a full guide.
+Implement [`server/openapi.yaml`](server/openapi.yaml).  Key points:
 
-- Errors use `application/problem+json`. The `detail` text is shown to users as written.
-- Files can be added, removed or re-configured only in `draft`.
-- `GET /migrations/{id}` returns `result` only when `status` is `succeeded`, and `error` only when it is `failed`.
-- Support `Idempotency-Key` on create and start, and `ETag` or `Retry-After` on status.
+- Errors use `application/problem+json`.  The `detail` text is shown to
+  users as written.
+- Files can be added, removed or reconfigured only in `draft`.
+- `GET /migrations/{id}` returns `result` only when `status` is `succeeded`,
+  and `error` only when it is `failed`.
+- Support `Idempotency-Key` on create and start, and `ETag` / `Retry-After`
+  on status.
 
-## Status
+## Adding a new platform adapter
 
-Tested: the gateway in mock mode, config saving and validation, and the response mapping against the contract. Not yet tested: the UI in a browser, and the gateway against a real upstream API.
+See [`docs/extending.md`](docs/extending.md) for the step-by-step guide.
+Open an [adapter request issue](.github/ISSUE_TEMPLATE/adapter.yml) first.

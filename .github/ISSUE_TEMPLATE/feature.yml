@@ -1,0 +1,45 @@
+name: Feature request
+description: Propose a new capability or improvement.
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Please describe what you want and why. Acceptance criteria help reviewers
+        write targeted tests before merging.
+
+  - type: textarea
+    id: story
+    attributes:
+      label: User story
+      placeholder: "As a migration engineer, I want … so that …"
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: layers
+    attributes:
+      label: Which layers are affected?
+      options:
+        - label: "Browser UI (`migration-app/`)"
+        - label: "Flask gateway (`server/app.py`)"
+        - label: "OpenAPI contract (`server/openapi.yaml`)"
+        - label: "Backend (upstream migration API)"
+        - label: "CI / tooling"
+
+  - type: textarea
+    id: criteria
+    attributes:
+      label: Acceptance criteria
+      placeholder: |
+        - [ ] The user can …
+        - [ ] The gateway returns …
+        - [ ] A test covers …
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Optional — describe other approaches you thought about.

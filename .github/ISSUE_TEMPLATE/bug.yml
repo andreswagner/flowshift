@@ -1,0 +1,64 @@
+name: Bug report
+description: Something in the UI or gateway is not working correctly.
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report a bug.
+        Please fill in as much detail as you can.
+
+  - type: dropdown
+    id: layer
+    attributes:
+      label: Which layer is affected?
+      options:
+        - Browser UI (migration-app/)
+        - Flask gateway (server/app.py)
+        - Both
+        - Not sure
+    validations:
+      required: true
+
+  - type: dropdown
+    id: mode
+    attributes:
+      label: Are you using mock mode or a real upstream API?
+      options:
+        - Mock mode (default)
+        - Real upstream API
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Open the app
+        2. Upload a .ktr file
+        3. Click Start translation
+        4. …
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behaviour
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behaviour
+      description: Include any error messages, stack traces or browser console output.
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: Commit or version
+      placeholder: "e.g. main@abc1234 or v1.2.0"

@@ -1,0 +1,5 @@
+Analyze this repository as the starting point for a new open-source AI-powered framework for migrating ETL pipelines across data integration platforms. Propose an implementation plan A web UI for migrating Pentaho flows to IBM DataStage. A user uploads Pentaho transformations (.ktr), jobs (.kjb) and a functional document. The backend translates them into a single DataStage .dsx export, and the user downloads it.
+
+The browser never talks to the backend directly. It talks to a small Flask gateway, which forwards calls to your migration API. The upstream URL, authentication, endpoint paths and response field names are all configurable from the UI, with no code changes.
+
+Recommend a practical architecture including source folders, UI component, data service abstractions, state management strategy, error handling, test strategy, and local validation steps. Also explain how the implementation should support later GitHub-driven feature evolution through issues and pull requests.

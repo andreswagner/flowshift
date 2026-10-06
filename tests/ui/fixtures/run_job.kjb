@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<job>
+  <info>
+    <name>run_job</name>
+    <description>Playwright E2E fixture — minimal valid .kjb</description>
+  </info>
+  <entry><name>START</name><type>SPECIAL</type></entry>
+  <entry><name>load_customers</name><type>TRANS</type></entry>
+</job>

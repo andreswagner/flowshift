@@ -1,0 +1,50 @@
+name: New platform adapter
+description: Request support for a new source or target data integration platform.
+labels: ["adapter-request"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this template to request support for a new source platform
+        (e.g. Informatica PowerCenter) or a new target platform (e.g. Apache Spark).
+        Attaching sample input files dramatically speeds up implementation.
+
+  - type: input
+    id: source
+    attributes:
+      label: Source platform and version
+      placeholder: "e.g. Informatica PowerCenter 10.5"
+    validations:
+      required: true
+
+  - type: input
+    id: target
+    attributes:
+      label: Target platform and version
+      placeholder: "e.g. IBM DataStage 11.7"
+    validations:
+      required: true
+
+  - type: textarea
+    id: file_types
+    attributes:
+      label: Source file types
+      description: List the file extensions your source platform exports (e.g. `.xml`, `.wf`).
+    validations:
+      required: true
+
+  - type: textarea
+    id: sample
+    attributes:
+      label: Sample files
+      description: |
+        Paste a minimal sanitised sample (no real credentials or PII), or link to
+        public documentation that describes the export format.
+    validations:
+      required: false
+
+  - type: textarea
+    id: notes
+    attributes:
+      label: Additional context
+      description: Known mapping challenges, business rules, or constraints.

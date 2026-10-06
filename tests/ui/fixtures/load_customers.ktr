@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<transformation>
+  <info>
+    <name>load_customers</name>
+    <description>Playwright E2E fixture — minimal valid .ktr</description>
+  </info>
+  <step><name>Table input</name><type>TableInput</type></step>
+  <step><name>Select values</name><type>SelectValues</type></step>
+  <step><name>Table output</name><type>TableOutput</type></step>
+</transformation>
