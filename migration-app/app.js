@@ -201,6 +201,33 @@ function viewFileList(kind) {
   }).join('')}</ul>`;
 }
 
+function viewFlowSummary() {
+  const okKjb = state.files.kjb.filter((f) => f.state === 'ok');
+  const okKtr = state.files.ktr.filter((f) => f.state === 'ok');
+  if (!okKjb.length && !okKtr.length) return '';
+
+  const rows = (files, label) => files.map((f) =>
+    `<li class="flow-sum-row">
+       ${svg(I.file, 14, '#525252', 'style="flex-shrink:0"')}
+       <span class="flow-sum-name">${esc(f.name)}</span>
+       <span class="flow-sum-size">${fmt(f.size)}</span>
+       <span class="tag">${label}</span>
+     </li>`).join('');
+
+  const outShape = okKjb.length && okKtr.length
+    ? ` · will produce ${plural(okKjb.length, 'sequence job')} and ${plural(okKtr.length, 'parallel job')}`
+    : '';
+
+  return `<section class="panel flow-sum" aria-labelledby="sec-flowsum">
+    <h2 id="sec-flowsum">Flow summary</h2>
+    <p class="sub">${plural(okKjb.length, 'job')} · ${plural(okKtr.length, 'transformation')}${outShape}</p>
+    <ul class="flow-sum-list">
+      ${rows(okKjb, '.kjb')}
+      ${rows(okKtr, '.ktr')}
+    </ul>
+  </section>`;
+}
+
 function viewUpload() {
   return Object.entries(KINDS).map(([k, d]) => `
     <section class="panel" aria-labelledby="sec-${k}">
@@ -211,7 +238,7 @@ function viewUpload() {
         <span><span class="hl">${d.dz}</span> or click to upload</span>
       </label>
       ${viewFileList(k)}
-    </section>`).join('');
+    </section>`).join('') + viewFlowSummary();
 }
 
 function viewTranslating() {
